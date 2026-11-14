@@ -1,215 +1,114 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useEffect, useMemo, useState } from 'react';
+
 import {
-  ShieldCheck, Users, DollarSign, BarChart3, Check, X, Search, LogOut, Trash2, Sliders, TrendingUp, Flag
+  ShieldCheck,
+  Users,
+  Building2,
+  CalendarDays,
+  Wallet,
+  Check,
+  X,
+  Search,
+  LogOut,
+  RefreshCw,
+  MapPin,
+  ArrowUpRight,
+  LayoutDashboard,
+  TrendingUp,
+  Clock3
 } from 'lucide-react';
 
-export default function AdminDashboard({ onLogout }) {
-  const [activeTab, setActiveTab] = useState('moderation');
-  const [currentUser, setCurrentUser] = useState(null);
+import api from '../api/axios';
+import './dashboards.css';
 
-  // 1. DYNAMIC MONGODB STATE: Pending Property Listings
-  const [pendingListings, setPendingListings] = useState([]);
-  const [isLoadingListings, setIsLoadingListings] = useState(true);
+const money=(value)=>`LKR ${Number(value||0).toLocaleString('en-LK')}`;
+const fallback='https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=900&q=80';
 
-  // Fetch Pending Listings on Load
-  useEffect(() => {
-    const fetchPendingListings = async () => {
-      const userStr = localStorage.getItem('user');
-      if (userStr) setCurrentUser(JSON.parse(userStr));
+export default function AdminDashboard({onLogout,onNavigateHome}) {
+  const [tab,setTab]=useState('overview');
+  const [overview,setOverview]=useState(null);
+  const [users,setUsers]=useState([]);
+  const [listings,setListings]=useState([]);
+  const [loading,setLoading]=useState(true);
+  const [error,setError]=useState('');
+  const [search,setSearch]=useState('');
+  const [role,setRole]=useState('all');
+  const [busyId,setBusyId]=useState('');
+  const user=useMemo(()=>{try{return JSON.parse(localStorage.getItem('user')||'null')}catch{return null}},[]);
 
-      try {
-        const response = await axios.get('http://localhost:5000/api/listings/pending');
-        setPendingListings(response.data);
-      } catch (err) {
-        console.error("Failed to load pending listings:", err);
-      } finally {
-        setIsLoadingListings(false);
-      }
-    };
+  const loadData=async()=>{
+    setLoading(true);setError('');
+    try{
+      const [overviewRes,userRes,listingRes]=await Promise.all([
+        api.get('/admin/overview'),
+        api.get('/admin/users'),
+        api.get('/listings/pending')
+      ]);
+      setOverview(overviewRes.data);
+      setUsers(Array.isArray(userRes.data)?userRes.data:[]);
+      setListings(Array.isArray(listingRes.data)?listingRes.data:[]);
+    }catch(err){setError(err.response?.data?.message||'Could not load administrator data. Make sure you are signed in with an admin account and restart the backend.')}
+    finally{setLoading(false)}
+  };
+  useEffect(()=>{loadData()},[]);
 
-    fetchPendingListings();
-  }, []);
-
-  // Action Handler: Approve or Reject a Property
-  const handleListingDecision = async (id, decision) => {
-    try {
-      // 'decision' is either 'Approved' or 'Rejected'
-      // If Approved, we set the MongoDB status to 'Active' so it appears on the Guest Homepage
-      const dbStatus = decision === 'Approved' ? 'Active' : 'Rejected';
-      
-      await axios.put(`http://localhost:5000/api/listings/${id}`, {
-        status: dbStatus
-      });
-
-      // Update the UI to show the new status badge
-      setPendingListings((prev) =>
-        prev.map((item) => (item._id === id ? { ...item, status: decision } : item))
-      );
-      
-      alert(`Property successfully ${decision.toLowerCase()}!`);
-    } catch (err) {
-      alert("Failed to update property status.");
-      console.error(err);
-    }
+  const decideListing=async(id,status)=>{
+    setBusyId(id);setError('');
+    try{
+      await api.put(`/listings/${id}`,{status});
+      setListings(items=>items.filter(item=>item._id!==id));
+      setOverview(current=>current?{...current,pendingListings:Math.max(0,(current.pendingListings||0)-1),activeListings:status==='Active'?(current.activeListings||0)+1:current.activeListings}:current);
+    }catch(err){setError(err.response?.data?.message||'Unable to update this property.')}
+    finally{setBusyId('')}
   };
 
-  // --- STATIC PLACEHOLDERS FOR OTHER TABS ---
-  const [flaggedReviews, setFlaggedReviews] = useState([
-    { id: 'REV-881', propertyName: 'Coconut Grove Beach Cabanas', reviewerName: 'kasun_travel99', rating: 1, reason: 'Reported Content: External Spam Link', comment: 'Visit www.cheap-scam-stays-lk.com for 90% discount!!', date: '2026-10-25', status: 'Flagged' }
-  ]);
-  const [userSearch, setUserSearch] = useState('');
-  const [roleFilter, setRoleFilter] = useState('All');
-  const [users, setUsers] = useState([
-    { id: 'USR-101', name: 'Nimal Rathnayake', email: 'host@subaarana.lk', role: 'Host', activity: 'Active Properties', status: 'Active', notes: 'Verified NIC' }
-  ]);
-  const [commissionSettings, setCommissionSettings] = useState({ bookingCommissionPercent: 5, hostAnnualSubscriptionLKR: 12000, zeroCommissionPromoActive: false });
-  const [hostPayouts, setHostPayouts] = useState([]);
-  const monthlyMetrics = [{ month: 'Oct', visits: 9600, bookings: 312, revenueLKR: 4120000 }];
+  const filteredUsers=users.filter(item=>{
+    const matchesRole=role==='all'||item.role===role;
+    const matchesSearch=`${item.fullName} ${item.email}`.toLowerCase().includes(search.toLowerCase());
+    return matchesRole&&matchesSearch;
+  });
+  const tabs=[{id:'overview',label:'Overview',icon:LayoutDashboard},{id:'properties',label:'Property approvals',icon:Building2,count:listings.length},{id:'users',label:'Users',icon:Users,count:users.length},{id:'analytics',label:'Platform insights',icon:TrendingUp}];
 
-  const handleReviewDecision = (id, decision) => {
-    setFlaggedReviews((prev) => prev.map((rev) => (rev.id === id ? { ...rev, status: decision } : rev)));
-  };
-  const handleUserStatusChange = (id, newStatus) => {
-    setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, status: newStatus } : u)));
-  };
-  const handleSaveCommission = (e) => { e.preventDefault(); alert("Commission Settings Saved"); };
-
-  const pendingModerationCount = pendingListings.filter((l) => l.status === 'Pending Approval').length + flaggedReviews.filter((r) => r.status === 'Flagged').length;
-
-  return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-amber-400 text-slate-950 p-2 rounded-xl shadow">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-lg tracking-tight">Suba-Arana</span>
-                <span className="text-[11px] uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">
-                  System Administrator
-                </span>
-              </div>
-              <p className="text-xs text-slate-400 hidden sm:block">
-                Welcome, {currentUser?.name || 'Admin'} • Content Moderation & Governance
-              </p>
-            </div>
+  return <div className="sa-dashboard sa-admin-dashboard">
+    <header className="sa-dash-nav sa-admin-nav">
+      <button className="sa-brand" onClick={onNavigateHome}><span className="sa-brand-mark"><ShieldCheck size={19}/></span><span><strong>Suba-Arana</strong><small>ADMINISTRATION</small></span></button>
+      <div className="sa-nav-right"><span className="sa-admin-pill"><span/> SYSTEM ADMIN</span><span className="sa-avatar">{(user?.name||'A').slice(0,1).toUpperCase()}</span><span className="sa-nav-user">{user?.name||'Administrator'}</span><button className="sa-icon-button" onClick={onLogout} title="Sign out"><LogOut size={18}/></button></div>
+    </header>
+    <main className="sa-dash-main">
+      <div className="sa-dash-welcome"><div><span className="sa-kicker">PLATFORM CONTROL CENTER</span><h1>Good day, {user?.name?.split(' ')[0]||'Administrator'}.</h1><p>Oversee local listings, support the host community and keep Suba-Arana running smoothly.</p></div><button className="sa-outline-btn" onClick={loadData}><RefreshCw size={15}/> Refresh data</button></div>
+      <nav className="sa-dash-tabs">{tabs.map(({id,label,icon:Icon,count})=><button key={id} className={tab===id?'active':''} onClick={()=>setTab(id)}><Icon size={17}/>{label}{count>0&&<span className="sa-tab-count">{count}</span>}</button>)}</nav>
+      {error&&<div className="sa-alert"><span>{error}</span><button onClick={loadData}><RefreshCw size={15}/> Retry</button></div>}
+      {loading?<div className="sa-empty"><span className="sa-spinner"/><p>Loading platform information…</p></div>:<>
+        {tab==='overview'&&<>
+          <section className="sa-stat-grid">
+            <AdminStat icon={Users} label="REGISTERED USERS" value={overview?.totalUsers??users.length} detail="Guest and host accounts"/>
+            <AdminStat icon={Building2} label="ACTIVE PROPERTIES" value={overview?.activeListings??'—'} detail={`${overview?.pendingListings??listings.length} awaiting review`} tone="green"/>
+            <AdminStat icon={CalendarDays} label="TOTAL BOOKINGS" value={overview?.totalBookings??'—'} detail="All booking requests" tone="blue"/>
+            <AdminStat icon={Wallet} label="CONFIRMED BOOKING VALUE" value={money(overview?.confirmedBookingValue)} detail="Value of confirmed reservations" tone="gold"/>
+          </section>
+          <div className="sa-admin-overview-grid">
+            <section className="sa-panel"><div className="sa-panel-heading"><div><span className="sa-kicker">REVIEW QUEUE</span><h2>Properties awaiting approval</h2></div><button className="sa-text-btn" onClick={()=>setTab('properties')}>Review all <ArrowUpRight size={15}/></button></div>
+              {listings.length?listings.slice(0,4).map(item=><AdminListingRow key={item._id} listing={item} onDecision={decideListing} busy={busyId===item._id}/>):<div className="sa-inline-empty"><Check size={18}/> All property submissions have been reviewed.</div>}
+            </section>
+            <section className="sa-panel sa-admin-side"><span className="sa-kicker">PLATFORM HEALTH</span><h2>Community at a glance</h2><div className="sa-host-side-stat"><span><Users size={16}/> Guests</span><strong>{overview?.guestUsers??'—'}</strong></div><div className="sa-host-side-stat"><span><Building2 size={16}/> Hosts</span><strong>{overview?.hostUsers??'—'}</strong></div><div className="sa-host-side-stat"><span><Clock3 size={16}/> Pending review</span><strong>{listings.length}</strong></div><button className="sa-dark-wide" onClick={()=>setTab('users')}>Manage community <ArrowUpRight size={15}/></button></section>
           </div>
-          <button type="button" onClick={onLogout} className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition cursor-pointer">
-            <LogOut className="w-4 h-4" /><span>Sign Out</span>
-          </button>
-        </div>
-      </header>
-
-      <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1">
-        <div className="flex flex-wrap gap-2 border-b border-slate-200 mb-6 pb-3">
-          {[
-            { id: 'moderation', label: `Content Moderation (${pendingModerationCount})`, icon: Flag },
-            { id: 'users', label: `User Management`, icon: Users },
-            { id: 'financials', label: 'Financial Oversight', icon: DollarSign },
-            { id: 'analytics', label: 'Analytics', icon: BarChart3 }
-          ].map((tab) => {
-            const Icon = tab.icon;
-            const active = activeTab === tab.id;
-            return (
-              <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer ${active ? 'bg-slate-900 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'}`}>
-                <Icon className="w-4 h-4" /><span>{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {activeTab === 'moderation' && (
-          <div className="space-y-8">
-            <div>
-              <h2 className="text-lg font-bold text-slate-900 mb-1">New Property Listings Pending Approval</h2>
-              <p className="text-xs text-slate-500 mb-4">Review host property submissions from the database.</p>
-
-              {isLoadingListings ? (
-                <p className="text-sm text-slate-500">Loading pending properties...</p>
-              ) : pendingListings.length === 0 ? (
-                <div className="bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-500 text-sm">
-                  No properties pending approval.
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {pendingListings.map((listing) => {
-                    // Populate hostName from MongoDB reference
-                    const hostName = listing.hostId?.fullName || 'Unknown Host';
-                    
-                    return (
-                      <div key={listing._id} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs flex flex-col">
-                        <div className="relative h-44 bg-slate-200">
-                          <img src={listing.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80'} alt={listing.name} className="w-full h-full object-cover" />
-                          <span className="absolute top-3 left-3 bg-slate-900/85 text-amber-300 text-xs font-semibold px-3 py-1 rounded-full">{listing.type}</span>
-                          <span className={`absolute top-3 right-3 text-xs font-bold px-2.5 py-1 rounded-full ${listing.status === 'Approved' || listing.status === 'Active' ? 'bg-emerald-100 text-emerald-800' : listing.status === 'Rejected' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-900'}`}>
-                            {listing.status === 'Active' ? 'Approved' : listing.status}
-                          </span>
-                        </div>
-
-                        <div className="p-5 flex-1 flex flex-col justify-between">
-                          <div>
-                            <div className="flex justify-between text-xs text-slate-400 font-mono mb-1">
-                              <span>{listing._id.substring(0, 8).toUpperCase()}</span>
-                            </div>
-                            <h3 className="text-base font-bold text-slate-900">{listing.name}</h3>
-                            <p className="text-xs font-semibold text-emerald-700 mb-2">{listing.location} • Host: {hostName}</p>
-                            <p className="text-xs text-slate-600 mb-4">{listing.description}</p>
-                          </div>
-
-                          <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                            <span className="text-sm font-bold text-slate-900">LKR {listing.basePrice?.toLocaleString()} / night</span>
-                            <div className="flex gap-2">
-                              <button type="button" disabled={listing.status !== 'Pending Approval'} onClick={() => handleListingDecision(listing._id, 'Approved')} className={`px-3.5 py-2 rounded-xl text-white text-xs font-semibold flex items-center gap-1 transition ${listing.status === 'Pending Approval' ? 'bg-emerald-700 hover:bg-emerald-800 cursor-pointer' : 'bg-emerald-300 cursor-not-allowed'}`}>
-                                <Check className="w-3.5 h-3.5" /><span>Approve</span>
-                              </button>
-                              <button type="button" disabled={listing.status !== 'Pending Approval'} onClick={() => handleListingDecision(listing._id, 'Rejected')} className={`px-3.5 py-2 rounded-xl text-white text-xs font-semibold flex items-center gap-1 transition ${listing.status === 'Pending Approval' ? 'bg-rose-600 hover:bg-rose-700 cursor-pointer' : 'bg-rose-300 cursor-not-allowed'}`}>
-                                <X className="w-3.5 h-3.5" /><span>Reject</span>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* Static Flagged Reviews Section */}
-            <div>
-              <h2 className="text-lg font-bold text-slate-900 mb-1">Flagged Guest Reviews</h2>
-              <div className="space-y-3 mt-3">
-                {flaggedReviews.map((rev) => (
-                  <div key={rev.id} className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                    <div className="space-y-1.5">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">{rev.reason}</span>
-                      </div>
-                      <p className="text-sm font-bold text-slate-900">{rev.propertyName} • By {rev.reviewerName}</p>
-                      <p className="text-xs text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200 italic">&ldquo;{rev.comment}&rdquo;</p>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <button type="button" onClick={() => handleReviewDecision(rev.id, 'Removed')} className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer">
-                        <Trash2 className="w-3.5 h-3.5" /><span>Remove</span>
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Static placeholders for other tabs */}
-        {activeTab !== 'moderation' && (
-          <div className="bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-500 text-sm">
-            This module is disabled in the current MongoDB prototype demo.
-          </div>
-        )}
-      </div>
-    </div>
-  );
+        </>}
+        {tab==='properties'&&<section className="sa-panel"><div className="sa-panel-heading"><div><span className="sa-kicker">LISTING GOVERNANCE</span><h2>Property approval queue</h2></div><span className="sa-muted">{listings.length} waiting for review</span></div>
+          {listings.length?<div className="sa-admin-listing-grid">{listings.map(item=><AdminListingCard key={item._id} listing={item} onDecision={decideListing} busy={busyId===item._id}/>)}</div>:<div className="sa-empty-state"><span><Check size={25}/></span><h3>Review queue is clear</h3><p>New host submissions will appear here for approval.</p></div>}
+        </section>}
+        {tab==='users'&&<section className="sa-panel"><div className="sa-panel-heading"><div><span className="sa-kicker">COMMUNITY DIRECTORY</span><h2>Registered users</h2></div><span className="sa-muted">{users.length} accounts</span></div>
+          <div className="sa-user-filters"><label className="sa-search"><Search size={16}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search name or email"/></label><select value={role} onChange={e=>setRole(e.target.value)}><option value="all">All roles</option><option value="guest">Guests</option><option value="host">Hosts</option><option value="admin">Admins</option></select></div>
+          <div className="sa-table-wrap"><table className="sa-table"><thead><tr><th>USER</th><th>EMAIL</th><th>ROLE</th><th>JOINED</th></tr></thead><tbody>{filteredUsers.map(item=><tr key={item._id}><td><span className="sa-table-user"><span className="sa-avatar">{(item.fullName||'U').slice(0,1).toUpperCase()}</span><strong>{item.fullName}</strong></span></td><td>{item.email}</td><td><span className={`sa-role-pill ${item.role}`}>{item.role}</span></td><td>{item.createdAt?new Date(item.createdAt).toLocaleDateString():'—'}</td></tr>)}</tbody></table></div>
+          {!filteredUsers.length&&<p className="sa-muted sa-table-empty">No accounts match this search.</p>}
+          <p className="sa-disclaimer">User access controls are not part of the current backend. This screen provides a live directory; it does not deactivate or modify accounts.</p>
+        </section>}
+        {tab==='analytics'&&<section className="sa-panel"><div className="sa-panel-heading"><div><span className="sa-kicker">LIVE PLATFORM METRICS</span><h2>Platform insights</h2></div></div><div className="sa-insight-grid"><div><small>ALL USERS</small><strong>{overview?.totalUsers??0}</strong><p>{overview?.guestUsers??0} guests · {overview?.hostUsers??0} hosts</p></div><div><small>LISTINGS</small><strong>{(overview?.activeListings||0)+(overview?.pendingListings||0)}</strong><p>{overview?.activeListings||0} active · {overview?.pendingListings||0} pending</p></div><div><small>BOOKINGS</small><strong>{overview?.totalBookings??0}</strong><p>{overview?.confirmedBookings??0} confirmed reservations</p></div><div><small>CONFIRMED BOOKING VALUE</small><strong>{money(overview?.confirmedBookingValue)}</strong><p>Gross reservation value, not platform revenue</p></div></div><p className="sa-disclaimer">These metrics are calculated from current MongoDB records. Traffic analytics, commission tracking and payout processing are not implemented in the current API.</p></section>}
+      </>}
+    </main>
+    <footer className="sa-dash-footer"><span>© {new Date().getFullYear()} Suba-Arana · Administration</span><span>Protecting authentic local hospitality</span></footer>
+  </div>;
 }
+
+function AdminStat({icon:Icon,label,value,detail,tone=''}){return <article className="sa-stat-card"><span className={`sa-stat-icon ${tone}`}><Icon size={19}/></span><small>{label}</small><strong>{value}</strong><p>{detail}</p></article>}
+function AdminListingRow({listing,onDecision,busy}){return <div className="sa-admin-row"><img src={listing.image||fallback} alt={listing.name}/><div><strong>{listing.name}</strong><p><MapPin size={13}/>{listing.location} · {listing.hostId?.fullName||'Host'}</p></div><div className="sa-admin-row-actions"><button disabled={busy} onClick={()=>onDecision(listing._id,'Active')}><Check size={14}/> Approve</button><button disabled={busy} onClick={()=>onDecision(listing._id,'Rejected')}><X size={14}/> Reject</button></div></div>}
+function AdminListingCard({listing,onDecision,busy}){return <article className="sa-admin-listing-card"><img src={listing.image||fallback} alt={listing.name}/><div className="sa-admin-listing-body"><span className="sa-kicker">{listing.type||'HOMESTAY'}</span><h3>{listing.name}</h3><p><MapPin size={14}/>{listing.location}</p><p className="sa-admin-host">Host: {listing.hostId?.fullName||'Unknown host'} · {listing.hostId?.email||''}</p><strong>{money(listing.basePrice)} <small>/ night</small></strong><div className="sa-admin-card-actions"><button disabled={busy} onClick={()=>onDecision(listing._id,'Active')}><Check size={15}/> Approve</button><button disabled={busy} onClick={()=>onDecision(listing._id,'Rejected')}><X size={15}/> Reject</button></div></div></article>}

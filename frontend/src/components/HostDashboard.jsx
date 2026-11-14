@@ -1,395 +1,135 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Home, Building2, Calendar, Clock, Plus, Edit3, DollarSign, Download, RefreshCw, User, MapPin, Check, X, LogOut, Sliders, Link2
+  Home, Building2, CalendarDays, Clock3, Plus, LogOut, MapPin, Check, X,
+  Wallet, TrendingUp, ArrowRight, RefreshCw, ChevronRight
 } from 'lucide-react';
+import api from '../api/axios';
+import './dashboards.css';
 
-const AMENITY_OPTIONS = [
-  'Free Wi-Fi', 'Air Conditioning', 'Breakfast Included', 'Free Parking', 'Mountain View', 'Hot Water', 'Kitchen Access', 'Airport Shuttle'
-];
+const money = (value) => `LKR ${Number(value || 0).toLocaleString('en-LK')}`;
+const date = (value) => value ? new Date(value).toLocaleDateString('en-LK', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+const fallback = 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=900&q=80';
+const amenityOptions = ['Free Wi-Fi','Air Conditioning','Breakfast Included','Free Parking','Mountain View','Hot Water','Kitchen Access','Airport Shuttle'];
 
-export default function HostDashboard({ onLogout }) {
-  const [activeTab, setActiveTab] = useState('bookings');
-  const [currentUser, setCurrentUser] = useState(null);
-
-  // Dynamic MongoDB State
+export default function HostDashboard({ onLogout, onNavigateHome }) {
+  const [tab, setTab] = useState('overview');
   const [listings, setListings] = useState([]);
   const [bookings, setBookings] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [showForm, setShowForm] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [busyId, setBusyId] = useState('');
+  const [form, setForm] = useState({ name:'', type:'Homestay', location:'', roomType:'', basePrice:'', image:'', description:'', amenities:['Free Wi-Fi','Breakfast Included'] });
+  const user = useMemo(() => { try { return JSON.parse(localStorage.getItem('user') || 'null'); } catch { return null; } }, []);
 
-  // Fetch Data on Load
-  useEffect(() => {
-    const fetchHostData = async () => {
-      const token = localStorage.getItem('token');
-      const userStr = localStorage.getItem('user');
-      
-      if (!token || !userStr) {
-        setIsLoading(false);
-        return;
-      }
-      
-      const user = JSON.parse(userStr);
-      setCurrentUser(user);
-
-      try {
-        // Fetch properties owned by this host
-        const listingsRes = await axios.get(`http://localhost:5000/api/listings/host/${user.id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setListings(listingsRes.data);
-
-        // Fetch bookings requested for this host's properties
-        const bookingsRes = await axios.get(`http://localhost:5000/api/bookings/host/${user.id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setBookings(bookingsRes.data);
-      } catch (err) {
-        console.error("Failed to load host dashboard data:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchHostData();
-  }, []);
-
-  // Listing Form State
-  const [showListingModal, setShowListingModal] = useState(false);
-  const [listingForm, setListingForm] = useState({
-    name: '', type: 'Homestay', location: '', roomType: '', basePrice: '', image: '', description: '', amenities: ['Free Wi-Fi', 'Breakfast Included']
-  });
-
-  // Booking / Guest Modals
-  const [selectedGuestProfile, setSelectedGuestProfile] = useState(null);
-  const [modifyingBooking, setModifyingBooking] = useState(null);
-
-  // Pricing Engine State
-  const [pricingConfig, setPricingConfig] = useState({
-    baseRate: 8500, seasonalMarkupPercent: 15, weekendDiscountPercent: 10, enableSeasonal: true, enableWeekendDiscount: true
-  });
-
-  // Calculate pending bookings dynamically
-  const pendingCount = bookings.filter(b => b.bookingStatus === 'Pending').length;
-
-  // --- Handlers ---
-
-  const handleBookingStatus = async (id, newStatus) => {
-    const token = localStorage.getItem('token');
+  const loadData = async () => {
+    if (!user?.id) { setError('Please sign in again to access your host portal.'); setLoading(false); return; }
+    setLoading(true); setError('');
     try {
-      await axios.put(`http://localhost:5000/api/bookings/${id}`, 
-        { bookingStatus: newStatus }, 
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setBookings(prev => prev.map(b => b._id === id ? { ...b, bookingStatus: newStatus } : b));
-    } catch (err) {
-      alert("Failed to update booking status.");
-    }
+      const [listRes, bookingRes] = await Promise.all([
+        api.get(`/listings/host/${user.id}`),
+        api.get(`/bookings/host/${user.id}`)
+      ]);
+      setListings(Array.isArray(listRes.data) ? listRes.data : []);
+      setBookings(Array.isArray(bookingRes.data) ? bookingRes.data : []);
+    } catch (err) { setError(err.response?.data?.message || 'Could not load host data. Check your connection and account role.'); }
+    finally { setLoading(false); }
   };
+  useEffect(() => { loadData(); }, []);
 
-  const openAddListingModal = () => {
-    setListingForm({
-      name: '', type: 'Homestay', location: '', roomType: '', basePrice: '', image: '', description: '', amenities: ['Free Wi-Fi', 'Breakfast Included']
-    });
-    setShowListingModal(true);
-  };
+  const pending = bookings.filter((b) => (b.bookingStatus || 'Pending') === 'Pending');
+  const confirmed = bookings.filter((b) => b.bookingStatus === 'Confirmed');
+  const earnings = confirmed.reduce((sum, b) => sum + Number(b.totalPrice || 0), 0);
+  const activeListings = listings.filter((l) => l.status === 'Active').length;
 
-  const toggleListingAmenity = (amenity) => {
-    setListingForm(prev => ({
-      ...prev,
-      amenities: prev.amenities.includes(amenity) ? prev.amenities.filter(a => a !== amenity) : [...prev.amenities, amenity]
-    }));
-  };
-
-  const handleSaveListing = async (e) => {
-    e.preventDefault();
-    if (!listingForm.name || !listingForm.location || !listingForm.basePrice) return;
-
-    const token = localStorage.getItem('token');
-    if (!token || !currentUser) {
-      alert("Session expired. Please log in again.");
-      return;
-    }
-
+  const updateBooking = async (id, bookingStatus) => {
+    setBusyId(id); setError('');
     try {
-      const newListing = {
-        ...listingForm,
-        hostId: currentUser.id,
-        basePrice: Number(listingForm.basePrice)
-      };
-
-      const response = await axios.post('http://localhost:5000/api/listings', newListing, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      // Add the new MongoDB document to the UI immediately
-      setListings(prev => [...prev, response.data]);
-      setShowListingModal(false);
-      alert("Property submitted! It is pending administrator approval.");
-    } catch (err) {
-      alert("Failed to create property. Ensure your backend is running.");
-      console.error(err);
-    }
+      await api.put(`/bookings/${id}`, { bookingStatus });
+      setBookings((items) => items.map((item) => item._id === id ? { ...item, bookingStatus } : item));
+    } catch (err) { setError(err.response?.data?.message || 'Unable to update this reservation.'); }
+    finally { setBusyId(''); }
   };
 
-  return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <header className="bg-emerald-950 text-white border-b border-emerald-800 sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-amber-400 text-emerald-950 p-2 rounded-xl shadow">
-              <Home className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-lg tracking-tight">Suba-Arana</span>
-                <span className="text-[11px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-800 text-amber-300 font-semibold">Host Portal</span>
-              </div>
-              <p className="text-xs text-emerald-300 hidden sm:block">
-                Welcome back, {currentUser?.name || 'Host'}
-              </p>
-            </div>
-          </div>
+  const toggleAmenity = (value) => setForm((current) => ({
+    ...current, amenities: current.amenities.includes(value) ? current.amenities.filter((item) => item !== value) : [...current.amenities, value]
+  }));
 
-          <div className="flex items-center gap-3">
-            <button type="button" onClick={openAddListingModal} className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-emerald-950 font-bold text-xs shadow-sm transition cursor-pointer">
-              <Plus className="w-4 h-4" /><span>Add Property</span>
-            </button>
-            <button type="button" onClick={onLogout} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-900 hover:bg-emerald-800 text-emerald-100 text-xs font-semibold transition cursor-pointer">
-              <LogOut className="w-4 h-4" /><span>Sign Out</span>
-            </button>
-          </div>
-        </div>
-      </header>
+  const submitListing = async (event) => {
+    event.preventDefault(); setSaving(true); setError('');
+    try {
+      const response = await api.post('/listings', { ...form, basePrice: Number(form.basePrice) });
+      setListings((items) => [response.data, ...items]);
+      setShowForm(false);
+      setForm({ name:'', type:'Homestay', location:'', roomType:'', basePrice:'', image:'', description:'', amenities:['Free Wi-Fi','Breakfast Included'] });
+      setTab('properties');
+    } catch (err) { setError(err.response?.data?.message || 'Could not submit this property. Check all required fields.'); }
+    finally { setSaving(false); }
+  };
 
-      <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Properties</span>
-            <div className="mt-2 flex items-baseline justify-between">
-              <span className="text-2xl font-bold text-slate-900">{listings.length}</span>
-            </div>
-          </div>
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Pending Requests</span>
-            <div className="mt-2 flex items-baseline justify-between">
-              <span className="text-2xl font-bold text-amber-600">{pendingCount}</span>
-              <span className="text-xs font-semibold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md">Needs Action</span>
-            </div>
-          </div>
-        </div>
+  const tabs = [
+    { id:'overview', label:'Overview', icon:Home },
+    { id:'reservations', label:'Reservations', icon:CalendarDays, count:pending.length },
+    { id:'properties', label:'My properties', icon:Building2, count:listings.length },
+    { id:'earnings', label:'Earnings', icon:Wallet }
+  ];
 
-        <div className="flex flex-wrap gap-2 border-b border-slate-200 mb-6 pb-3">
-          {[
-            { id: 'bookings', label: `Booking Requests (${pendingCount})`, icon: Clock },
-            { id: 'listings', label: `My Listings (${listings.length})`, icon: Building2 },
-            { id: 'calendar', label: 'Availability & Pricing', icon: Calendar },
-            { id: 'financials', label: 'Financials', icon: DollarSign }
-          ].map((tab) => {
-            const Icon = tab.icon;
-            const active = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer ${active ? 'bg-emerald-800 text-white' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'}`}
-              >
-                <Icon className="w-4 h-4" /><span>{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* TAB 1: BOOKINGS */}
-        {activeTab === 'bookings' && (
-          <div className="space-y-4">
-            <h2 className="text-lg font-bold text-slate-900">Incoming & Upcoming Bookings</h2>
-            
-            {isLoading ? (
-              <p className="text-sm text-slate-500">Loading bookings from database...</p>
-            ) : bookings.length === 0 ? (
-              <div className="bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-500 text-sm">
-                No bookings found.
-              </div>
-            ) : (
-              bookings.map((booking) => (
-                <div key={booking._id} className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                  <div className="space-y-1.5">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-xs font-mono font-bold text-slate-500">
-                        {booking._id.substring(0, 8).toUpperCase()}
-                      </span>
-                      <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${booking.bookingStatus === 'Confirmed' ? 'bg-emerald-100 text-emerald-800' : booking.bookingStatus === 'Declined' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'}`}>
-                        {booking.bookingStatus}
-                      </span>
-                      <span className="text-sm font-bold text-slate-900">{booking.listingId?.name || 'Unknown Property'}</span>
-                    </div>
-
-                    <p className="text-xs text-slate-700">
-                      <strong>Guest:</strong> {booking.guestId?.fullName || 'Traveler'} • <strong>Dates:</strong> {new Date(booking.checkIn).toLocaleDateString()} to {new Date(booking.checkOut).toLocaleDateString()}
-                    </p>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-3">
-                    <div className="mr-2">
-                      <span className="block text-[11px] uppercase text-slate-400 font-semibold">Total Price</span>
-                      <span className="text-base font-bold text-emerald-800">LKR {booking.totalPrice?.toLocaleString() || 0}</span>
-                    </div>
-
-                    {booking.bookingStatus === 'Pending' && (
-                      <>
-                        <button type="button" onClick={() => handleBookingStatus(booking._id, 'Confirmed')} className="px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer">
-                          <Check className="w-3.5 h-3.5" /><span>Accept</span>
-                        </button>
-                        <button type="button" onClick={() => handleBookingStatus(booking._id, 'Declined')} className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer">
-                          <X className="w-3.5 h-3.5" /><span>Decline</span>
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        )}
-
-        {/* TAB 2: LISTINGS */}
-        {activeTab === 'listings' && (
-          <div>
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-              <h2 className="text-lg font-bold text-slate-900">My Property Listings</h2>
-              <button type="button" onClick={openAddListingModal} className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold shadow-sm cursor-pointer">
-                <Plus className="w-4 h-4" /><span>Create New Listing</span>
-              </button>
-            </div>
-
-            {isLoading ? (
-              <p className="text-sm text-slate-500">Loading properties...</p>
-            ) : listings.length === 0 ? (
-              <div className="bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-500 text-sm">
-                You haven't listed any properties yet. Click "Create New Listing" to start!
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {listings.map((item) => (
-                  <div key={item._id} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs flex flex-col">
-                    <div className="relative h-48 bg-slate-200">
-                      <img src={item.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=900&q=80'} alt={item.name} className="w-full h-full object-cover" />
-                      <span className="absolute top-3 left-3 bg-emerald-950/85 text-amber-300 text-xs font-semibold px-3 py-1 rounded-full">{item.type}</span>
-                      <span className={`absolute top-3 right-3 text-xs font-bold px-2.5 py-1 rounded-full ${item.status === 'Active' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900'}`}>
-                        {item.status}
-                      </span>
-                    </div>
-
-                    <div className="p-5 flex-1 flex flex-col justify-between">
-                      <div>
-                        <div className="flex items-center gap-1 text-xs text-emerald-700 font-semibold mb-1">
-                          <MapPin className="w-3.5 h-3.5" /><span>{item.location} • {item.roomType}</span>
-                        </div>
-                        <h3 className="text-base font-bold text-slate-900 mb-2">{item.name}</h3>
-                        <p className="text-xs text-slate-600 mb-3 line-clamp-2">{item.description}</p>
-                        
-                        <div className="flex flex-wrap gap-1.5 mb-4">
-                          {item.amenities.map((am) => (
-                            <span key={am} className="text-[11px] bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-md font-medium">{am}</span>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="pt-3 border-t border-slate-100">
-                        <span className="text-base font-bold text-slate-900">LKR {item.basePrice.toLocaleString()}</span>
-                        <span className="text-xs text-slate-500"> / night base</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* TAB 3 & 4: Placeholders for now */}
-        {(activeTab === 'calendar' || activeTab === 'financials') && (
-           <div className="bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-500 text-sm">
-             These modules are disabled in the live MongoDB prototype demo.
-           </div>
-        )}
+  return <div className="sa-dashboard">
+    <header className="sa-dash-nav">
+      <button className="sa-brand" onClick={onNavigateHome}><span className="sa-brand-mark"><Home size={19}/></span><span><strong>Suba-Arana</strong><small>HOST MANAGEMENT PORTAL</small></span></button>
+      <div className="sa-nav-right"><span className="sa-host-pill"><span/> HOST PORTAL</span><span className="sa-avatar">{(user?.name || 'H').slice(0,1).toUpperCase()}</span><span className="sa-nav-user">{user?.name || 'Host'}</span><button className="sa-icon-button" onClick={onLogout} title="Sign out"><LogOut size={18}/></button></div>
+    </header>
+    <main className="sa-dash-main">
+      <div className="sa-dash-welcome sa-host-welcome">
+        <div><span className="sa-kicker">AYUBOWAN, {user?.name?.toUpperCase() || 'LOCAL HOST'}</span><h1>Hospitality Dashboard</h1><p>Manage your properties, welcome your guests and grow your local hosting business.</p></div>
+        <button className="sa-primary-btn" onClick={() => setShowForm(true)}><Plus size={17}/> Add new property</button>
       </div>
-
-      {/* CREATE PROPERTY MODAL */}
-      {showListingModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl my-8">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold text-slate-900">Add New Property Listing</h3>
-              <button type="button" onClick={() => setShowListingModal(false)} className="p-1 cursor-pointer">
-                <X className="w-5 h-5 text-slate-400 hover:text-slate-600" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveListing} className="space-y-4 text-xs">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="sm:col-span-2">
-                  <label className="block font-bold uppercase text-slate-600 mb-1">Property Name *</label>
-                  <input type="text" required value={listingForm.name} onChange={(e) => setListingForm(p => ({ ...p, name: e.target.value }))} placeholder="Hilltop Tea Homestay" className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl" />
-                </div>
-                <div>
-                  <label className="block font-bold uppercase text-slate-600 mb-1">Property Type</label>
-                  <select value={listingForm.type} onChange={(e) => setListingForm(p => ({ ...p, type: e.target.value }))} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl">
-                    <option value="Homestay">Homestay</option>
-                    <option value="Guest House">Guest House</option>
-                    <option value="Bungalow">Bungalow</option>
-                    <option value="Cabana">Cabana</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div>
-                  <label className="block font-bold uppercase text-slate-600 mb-1">Location *</label>
-                  <input type="text" required value={listingForm.location} onChange={(e) => setListingForm(p => ({ ...p, location: e.target.value }))} placeholder="Ella, Kandy..." className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl" />
-                </div>
-                <div>
-                  <label className="block font-bold uppercase text-slate-600 mb-1">Room Type *</label>
-                  <input type="text" required value={listingForm.roomType} onChange={(e) => setListingForm(p => ({ ...p, roomType: e.target.value }))} placeholder="Deluxe Double" className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl" />
-                </div>
-                <div>
-                  <label className="block font-bold uppercase text-slate-600 mb-1">Nightly Price (LKR) *</label>
-                  <input type="number" required value={listingForm.basePrice} onChange={(e) => setListingForm(p => ({ ...p, basePrice: e.target.value }))} placeholder="8500" className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl" />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-bold uppercase text-slate-600 mb-1">Image URL</label>
-                <input type="url" value={listingForm.image} onChange={(e) => setListingForm(p => ({ ...p, image: e.target.value }))} placeholder="https://images.unsplash.com/..." className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl" />
-              </div>
-
-              <div>
-                <label className="block font-bold uppercase text-slate-600 mb-1">Description</label>
-                <textarea rows="2" value={listingForm.description} onChange={(e) => setListingForm(p => ({ ...p, description: e.target.value }))} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl" />
-              </div>
-
-              <div>
-                <label className="block font-bold uppercase text-slate-600 mb-2">Amenities</label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {AMENITY_OPTIONS.map((amenity) => {
-                    const active = listingForm.amenities.includes(amenity);
-                    return (
-                      <button key={amenity} type="button" onClick={() => toggleListingAmenity(amenity)} className={`py-2 px-2.5 rounded-xl border text-left font-semibold cursor-pointer ${active ? 'bg-emerald-800 text-white border-emerald-800' : 'bg-slate-50 text-slate-700'}`}>
-                        {active ? '✓ ' : '+ '}{amenity}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="pt-2 flex justify-end gap-2">
-                <button type="button" onClick={() => setShowListingModal(false)} className="px-4 py-2.5 rounded-xl border border-slate-200 font-semibold cursor-pointer">Cancel</button>
-                <button type="submit" className="px-5 py-2.5 rounded-xl bg-emerald-700 text-white font-semibold cursor-pointer">Publish Property</button>
-              </div>
-            </form>
+      <nav className="sa-dash-tabs">{tabs.map(({id,label,icon:Icon,count}) => <button key={id} className={tab===id?'active':''} onClick={()=>setTab(id)}><Icon size={17}/>{label}{count>0&&<span className="sa-tab-count">{count}</span>}</button>)}</nav>
+      {error && <div className="sa-alert"><span>{error}</span><button onClick={loadData}><RefreshCw size={15}/> Retry</button></div>}
+      {loading ? <div className="sa-empty"><span className="sa-spinner"/><p>Loading your host workspace…</p></div> : <>
+        {tab==='overview' && <>
+          <section className="sa-stat-grid">
+            <article className="sa-stat-card"><span className="sa-stat-icon"><Building2 size={19}/></span><small>TOTAL PROPERTIES</small><strong>{listings.length}</strong><p>{activeListings} currently visible to guests</p></article>
+            <article className="sa-stat-card"><span className="sa-stat-icon gold"><Clock3 size={19}/></span><small>NEW REQUESTS</small><strong>{pending.length}</strong><p>Reservations awaiting your response</p></article>
+            <article className="sa-stat-card"><span className="sa-stat-icon blue"><CalendarDays size={19}/></span><small>CONFIRMED BOOKINGS</small><strong>{confirmed.length}</strong><p>Accepted guest reservations</p></article>
+            <article className="sa-stat-card"><span className="sa-stat-icon green"><Wallet size={19}/></span><small>BOOKING VALUE</small><strong>{money(earnings)}</strong><p>Total value of confirmed bookings</p></article>
+          </section>
+          <div className="sa-host-grid">
+            <section className="sa-panel"><div className="sa-panel-heading"><div><span className="sa-kicker">NEEDS YOUR ATTENTION</span><h2>New reservation requests</h2></div><button className="sa-text-btn" onClick={()=>setTab('reservations')}>View all <ArrowRight size={15}/></button></div>
+              {pending.length ? pending.slice(0,4).map((booking)=><HostBooking key={booking._id} booking={booking} onUpdate={updateBooking} busy={busyId===booking._id}/>) : <EmptyHost title="You're all caught up" text="New guest booking requests will appear here."/>}
+            </section>
+            <section className="sa-panel sa-host-side"><span className="sa-kicker">YOUR HOSTING SNAPSHOT</span><h2>Local hospitality, made simple.</h2><p>Keep your property information up to date and respond to guest requests promptly.</p><div className="sa-host-side-stat"><span><Building2 size={17}/> Listed properties</span><strong>{listings.length}</strong></div><div className="sa-host-side-stat"><span><Check size={17}/> Confirmed stays</span><strong>{confirmed.length}</strong></div><button className="sa-dark-wide" onClick={()=>setTab('properties')}>Manage my properties <ChevronRight size={16}/></button></section>
           </div>
-        </div>
-      )}
-    </div>
-  );
+        </>}
+        {tab==='reservations' && <section className="sa-panel"><div className="sa-panel-heading"><div><span className="sa-kicker">GUEST RELATIONSHIPS</span><h2>Reservations & check-ins</h2></div><span className="sa-muted">{bookings.length} total</span></div>
+          {bookings.length ? bookings.slice().sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).map((booking)=><HostBooking key={booking._id} booking={booking} onUpdate={updateBooking} busy={busyId===booking._id}/>) : <EmptyHost title="No reservations yet" text="When guests request one of your approved properties, their reservations will appear here."/>}
+        </section>}
+        {tab==='properties' && <section className="sa-panel"><div className="sa-panel-heading"><div><span className="sa-kicker">YOUR PLACES</span><h2>My properties</h2></div><button className="sa-primary-btn" onClick={()=>setShowForm(true)}><Plus size={16}/> Add property</button></div>
+          {listings.length ? <div className="sa-property-grid">{listings.map((listing)=><article className="sa-property-card" key={listing._id}><img src={listing.image||fallback} alt={listing.name}/><div className="sa-property-body"><div className="sa-property-top"><span className={`sa-status ${String(listing.status).toLowerCase().replace(/\s/g,'-')}`}>{listing.status||'Pending Approval'}</span><small>{listing.type}</small></div><h3>{listing.name}</h3><p><MapPin size={14}/>{listing.location}</p><div className="sa-property-price"><strong>{money(listing.basePrice)}</strong><small> / night</small></div></div></article>)}</div> : <EmptyHost title="Add your first property" text="Share your homestay with travellers looking for authentic local experiences." action={()=>setShowForm(true)}/>}
+        </section>}
+        {tab==='earnings' && <section className="sa-panel"><div className="sa-panel-heading"><div><span className="sa-kicker">HOST FINANCIALS</span><h2>Booking earnings overview</h2></div></div><div className="sa-earnings-hero"><span><TrendingUp size={20}/></span><div><small>CONFIRMED BOOKING VALUE</small><strong>{money(earnings)}</strong><p>Calculated from confirmed reservations in your account.</p></div></div><div className="sa-earnings-row"><span>Confirmed reservations</span><strong>{confirmed.length}</strong></div><div className="sa-earnings-row"><span>Pending requests</span><strong>{pending.length}</strong></div><div className="sa-earnings-row"><span>All reservations</span><strong>{bookings.length}</strong></div><p className="sa-disclaimer">This is a booking-value summary, not a verified payout statement. Payment settlement is not connected in the current backend.</p></section>}
+      </>}
+    </main>
+    <footer className="sa-dash-footer"><span>© {new Date().getFullYear()} Suba-Arana · Host community</span><span>Thoughtful stays. Local connections.</span></footer>
+
+    {showForm && <div className="sa-modal-backdrop" role="presentation" onMouseDown={(e)=>{if(e.target===e.currentTarget)setShowForm(false);}}><section className="sa-modal" role="dialog" aria-modal="true" aria-labelledby="sa-add-property-title"><div className="sa-modal-head"><div><span className="sa-kicker">WELCOME GUESTS TO YOUR HOME</span><h2 id="sa-add-property-title">Add a property</h2></div><button className="sa-icon-button" onClick={()=>setShowForm(false)}><X size={19}/></button></div><form onSubmit={submitListing} className="sa-form-grid">
+      <label>PROPERTY NAME<input required value={form.name} onChange={(e)=>setForm({...form,name:e.target.value})} placeholder="e.g. Hill Country Tea Bungalow"/></label>
+      <label>PROPERTY TYPE<select value={form.type} onChange={(e)=>setForm({...form,type:e.target.value})}><option>Homestay</option><option>Guest House</option><option>Villa</option><option>Bungalow</option><option>Eco Lodge</option></select></label>
+      <label>LOCATION<input required value={form.location} onChange={(e)=>setForm({...form,location:e.target.value})} placeholder="Ella, Sri Lanka"/></label>
+      <label>ROOM TYPE<input required value={form.roomType} onChange={(e)=>setForm({...form,roomType:e.target.value})} placeholder="Deluxe double room"/></label>
+      <label>PRICE PER NIGHT (LKR)<input required min="1" type="number" value={form.basePrice} onChange={(e)=>setForm({...form,basePrice:e.target.value})} placeholder="8500"/></label>
+      <label>PROPERTY IMAGE URL<input value={form.image} onChange={(e)=>setForm({...form,image:e.target.value})} placeholder="https://…"/></label>
+      <label className="sa-form-full">DESCRIPTION<textarea required rows="3" value={form.description} onChange={(e)=>setForm({...form,description:e.target.value})} placeholder="Describe your property and the experience guests can enjoy."/></label>
+      <div className="sa-form-full"><span className="sa-field-label">AMENITIES</span><div className="sa-amenity-picks">{amenityOptions.map((item)=><label key={item}><input type="checkbox" checked={form.amenities.includes(item)} onChange={()=>toggleAmenity(item)}/>{item}</label>)}</div></div>
+      <div className="sa-form-actions sa-form-full"><button type="button" className="sa-outline-btn" onClick={()=>setShowForm(false)}>Cancel</button><button type="submit" className="sa-primary-btn" disabled={saving}>{saving?'Submitting…':'Submit for approval'} <ArrowRight size={15}/></button></div>
+    </form><p className="sa-form-note">Your listing will be reviewed by Suba-Arana administrators before it appears publicly.</p></section></div>}
+  </div>;
 }
+
+function HostBooking({ booking, onUpdate, busy }) {
+  const listing=booking.listingId||{}, guest=booking.guestId||{};
+  const status=booking.bookingStatus||'Pending';
+  return <article className="sa-host-booking"><div className="sa-guest-avatar">{(guest.fullName||'G').slice(0,1).toUpperCase()}</div><div className="sa-host-booking-main"><div className="sa-host-booking-title"><strong>{guest.fullName||'Guest reservation'}</strong><span className={`sa-status ${status.toLowerCase()}`}>{status}</span></div><p>{listing.name||'Your property'} · {date(booking.checkIn)} – {date(booking.checkOut)}</p><small>{guest.email||'Guest contact details'} {guest.phone?`· ${guest.phone}`:''}</small></div><div className="sa-host-booking-end"><strong>{money(booking.totalPrice)}</strong>{status==='Pending'?<div className="sa-booking-actions"><button disabled={busy} onClick={()=>onUpdate(booking._id,'Confirmed')}><Check size={14}/> Accept</button><button disabled={busy} onClick={()=>onUpdate(booking._id,'Declined')}><X size={14}/> Decline</button></div>:<small>{booking.paymentStatus||'Payment status unavailable'}</small>}</div></article>;
+}
+function EmptyHost({title,text,action}) { return <div className="sa-empty-state"><span><Building2 size={25}/></span><h3>{title}</h3><p>{text}</p>{action&&<button className="sa-primary-btn" onClick={action}><Plus size={15}/> Add property</button>}</div>; }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import {
-  Home, Search, MapPin, Calendar, SlidersHorizontal, Heart, Star, LayoutGrid, Map, CheckCircle2, X, BedDouble, Navigation, User
+  Search, MapPin, Calendar, SlidersHorizontal, Heart, Star, LayoutGrid, Map, CheckCircle2, X, BedDouble, Navigation, User, Globe2
 } from 'lucide-react';
 
 const FACILITY_OPTIONS = [
@@ -30,7 +30,10 @@ export default function GuestHomePage({ onNavigateToLogin, onNavigateToRegister 
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
   // Interactive User States
-  const [favorites, setFavorites] = useState([]);
+  const [favorites, setFavorites] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('suba-arana-favorites') || '[]'); }
+    catch { return []; }
+  });
   const [selectedPropertyForBooking, setSelectedPropertyForBooking] = useState(null);
   const [selectedPropertyForChat, setSelectedPropertyForChat] = useState(null);
   const [chatMessage, setChatMessage] = useState('');
@@ -60,6 +63,8 @@ export default function GuestHomePage({ onNavigateToLogin, onNavigateToRegister 
 
     fetchProperties();
   }, []);
+
+  useEffect(() => { localStorage.setItem('suba-arana-favorites', JSON.stringify(favorites)); }, [favorites]);
 
   const toggleFavorite = (id) => {
     setFavorites((prev) =>
@@ -174,51 +179,37 @@ export default function GuestHomePage({ onNavigateToLogin, onNavigateToRegister 
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
-      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2.5 cursor-pointer" onClick={resetFilters}>
-            <div className="bg-emerald-800 text-amber-400 p-2 rounded-xl shadow-sm">
-              <Home className="w-6 h-6" />
-            </div>
-            <div>
-              <span className="text-xl font-bold tracking-tight text-slate-900">Suba-Arana</span>
-              <span className="hidden sm:inline-block ml-2 text-xs px-2 py-0.5 bg-emerald-50 text-emerald-800 rounded-full font-medium">
-                Direct Booking Network
-              </span>
-            </div>
-          </div>
+      <header className="sa-site-header sticky top-0 z-30">
+        <div className="sa-nav-inner">
+          <button type="button" className="sa-brand" onClick={resetFilters} aria-label="Suba-Arana home">
+            <img src="/suba-arana-emblem.png" alt="Suba-Arana Sri Lankan heritage pavilion emblem" />
+            <span className="sa-brand-copy">
+              <strong>Suba-Arana</strong>
+              <small>සුබ අරණ · ශ්‍රී ලාංකීය නවාතැන්</small>
+            </span>
+          </button>
 
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition cursor-pointer ${
-                showFavoritesOnly ? 'bg-rose-50 border-rose-200 text-rose-700' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-              }`}
-            >
-              <Heart className={`w-4 h-4 ${showFavoritesOnly ? 'fill-rose-500 text-rose-500' : 'text-slate-500'}`} />
-              <span>Saved ({favorites.length})</span>
-            </button>
-            <button
-              type="button"
-              onClick={onNavigateToRegister}
-              className="hidden md:inline-flex px-3.5 py-2 rounded-xl text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 transition cursor-pointer"
-            >
-              List Your Property
-            </button>
-            <button
-              type="button"
-              onClick={onNavigateToLogin}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-800 text-white hover:bg-emerald-900 shadow-sm transition cursor-pointer"
-            >
-              <User className="w-4 h-4" />
-              <span>Sign In</span>
-            </button>
+          <nav className="sa-main-nav" aria-label="Main navigation">
+            <button type="button" className="sa-nav-active" onClick={resetFilters}>Explore Stays</button>
+            <button type="button" onClick={() => document.getElementById('sa-stays')?.scrollIntoView({ behavior: 'smooth' })}>Destinations <span>(Sigiriya, Ella, Galle Fort)</span></button>
+            <button type="button" onClick={() => document.getElementById('sa-stays')?.scrollIntoView({ behavior: 'smooth' })}>Cultural Experiences</button>
+            <button type="button" onClick={onNavigateToRegister}>Local Hosts</button>
+          </nav>
+
+          <div className="sa-nav-actions">
+            <button type="button" className="sa-icon-action" aria-label="Go to search" onClick={() => document.getElementById('sa-search-location')?.focus()}><Search /></button>
+            <span className="sa-locale"><Globe2 /> LKR / USD · EN / SI</span>
+            <button type="button" className="sa-host-cta" onClick={onNavigateToRegister}>Become a Host</button>
+            <button type="button" className="sa-avatar-button" onClick={onNavigateToLogin} aria-label="Sign in"><User /></button>
+          </div>
+          <div className="sa-mobile-actions">
+            <button type="button" onClick={() => setShowFavoritesOnly(!showFavoritesOnly)} aria-label="Saved stays"><Heart /></button>
+            <button type="button" onClick={onNavigateToLogin}>Sign In</button>
           </div>
         </div>
       </header>
 
-      <section className="relative bg-emerald-900 text-white py-10 sm:py-14 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <section id="sa-stays" className="relative bg-emerald-900 text-white py-10 sm:py-14 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center opacity-25" style={{ backgroundImage: `url('https://images.unsplash.com/photo-1546708973-b339540b5162?auto=format&fit=crop&w=1600&q=80')` }} />
         <div className="relative z-10 max-w-6xl mx-auto">
           <div className="max-w-2xl mb-6">
@@ -242,6 +233,7 @@ export default function GuestHomePage({ onNavigateToLogin, onNavigateToRegister 
                   type="text"
                   value={searchLocation}
                   onChange={(e) => setSearchLocation(e.target.value)}
+                  id="sa-search-location"
                   placeholder="Ella, Galle, Mirissa..."
                   className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600"
                 />
@@ -427,13 +419,10 @@ export default function GuestHomePage({ onNavigateToLogin, onNavigateToRegister 
                             <span className="text-lg font-bold text-slate-900">LKR {property.basePrice.toLocaleString()}</span>
                             <span className="text-xs text-slate-500"> / night</span>
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => setSelectedPropertyForBooking(property)}
-                            className="px-4 py-2.5 bg-emerald-700 text-white text-xs font-semibold rounded-xl cursor-pointer"
-                          >
-                            Book Direct
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button type="button" onClick={() => onViewProperty?.(property)} className="px-3 py-2.5 border border-emerald-800 text-emerald-900 text-xs font-semibold rounded-xl cursor-pointer hover:bg-emerald-50">View details</button>
+                            <button type="button" onClick={() => setSelectedPropertyForBooking(property)} className="px-4 py-2.5 bg-emerald-700 text-white text-xs font-semibold rounded-xl cursor-pointer">Book Direct</button>
+                          </div>
                         </div>
                       </div>
                     </div>

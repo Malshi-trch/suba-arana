@@ -50,7 +50,7 @@ export default function LoginPage({
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
       
-      alert(`Logged in successfully as ${response.data.user.role} (${response.data.user.email})`);
+      onLoginSuccess?.(response.data.user.role);
       
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please check your credentials and ensure the backend is running.');

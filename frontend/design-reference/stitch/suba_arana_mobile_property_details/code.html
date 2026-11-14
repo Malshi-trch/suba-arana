@@ -1,0 +1,464 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"><meta content="mobile_stack" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "inverse-primary": "#a9cfb9", "background": "#fcf9f4", "on-primary-fixed-variant": "#2b4e3d", "secondary-fixed": "#ffdea3", "surface-variant": "#e5e2dd", "on-secondary-fixed-variant": "#5c4200", "surface-container-high": "#ebe8e3", "primary-fixed-dim": "#a9cfb9", "tertiary": "#3f0f00", "on-tertiary-container": "#e7835e", "on-error": "#ffffff", "primary": "#002517", "on-surface": "#1c1c19", "error": "#ba1a1a", "surface-tint": "#436653", "secondary-fixed-dim": "#efbf5d", "on-surface-variant": "#414844", "outline": "#727973", "surface-container-lowest": "#ffffff", "on-secondary-container": "#775600", "tertiary-fixed": "#ffdbcf", "surface-container-low": "#f6f3ee", "secondary-container": "#ffcd69", "secondary": "#7a5900", "on-tertiary": "#ffffff", "on-primary-fixed": "#002113", "on-secondary-fixed": "#261900", "on-tertiary-fixed-variant": "#7a2f11", "tertiary-container": "#621e02", "tertiary-fixed-dim": "#ffb59b", "on-tertiary-fixed": "#380d00", "on-secondary": "#ffffff", "primary-container": "#183b2b", "error-container": "#ffdad6", "primary-fixed": "#c4ecd4", "inverse-surface": "#31302d", "on-error-container": "#93000a", "on-background": "#1c1c19", "outline-variant": "#c1c8c2", "surface-dim": "#dcdad5", "surface": "#fcf9f4", "on-primary-container": "#80a690", "inverse-on-surface": "#f3f0eb", "on-primary": "#ffffff", "surface-container": "#f0ede9", "surface-bright": "#fcf9f4", "surface-container-highest": "#e5e2dd" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "space-sm": "0.5rem", "margin": "3rem", "space-md": "1rem", "margin-mobile": "1.25rem", "space-xl": "2.5rem", "gutter": "1.5rem", "space-xs": "0.25rem", "gutter-mobile": "1rem", "space-lg": "1.5rem" }, fontFamily: { "headline-lg": ["Playfair Display"], "body-sm": ["Plus Jakarta Sans"], "headline-lg-mobile": ["Playfair Display"], "label-caps": ["Plus Jakarta Sans"], "label-md": ["Plus Jakarta Sans"], "body-lg": ["Plus Jakarta Sans"], "headline-sm": ["Playfair Display"], "display-lg-mobile": ["Playfair Display"], "display-lg": ["Playfair Display"], "headline-md": ["Playfair Display"], "label-lg": ["Plus Jakarta Sans"], "body-md": ["Plus Jakarta Sans"] }, fontSize: { "headline-lg": ["2.5rem", { "lineHeight": "3rem", "letterSpacing": "-0.015em", "fontWeight": "600" }], "body-sm": ["0.8125rem", { "lineHeight": "1.25rem", "fontWeight": "400" }], "headline-lg-mobile": ["1.75rem", { "lineHeight": "2.25rem", "letterSpacing": "0em", "fontWeight": "600" }], "label-caps": ["0.6875rem", { "lineHeight": "1rem", "letterSpacing": "0.08em", "fontWeight": "700" }], "label-md": ["0.75rem", { "lineHeight": "1rem", "letterSpacing": "0.02em", "fontWeight": "600" }], "body-lg": ["1.125rem", { "lineHeight": "1.75rem", "fontWeight": "400" }], "headline-sm": ["1.25rem", { "lineHeight": "1.75rem", "fontWeight": "600" }], "display-lg-mobile": ["2.25rem", { "lineHeight": "2.75rem", "letterSpacing": "-0.01em", "fontWeight": "600" }], "display-lg": ["3.5rem", { "lineHeight": "4.25rem", "letterSpacing": "-0.02em", "fontWeight": "600" }], "headline-md": ["1.75rem", { "lineHeight": "2.25rem", "fontWeight": "500" }], "label-lg": ["0.875rem", { "lineHeight": "1.25rem", "letterSpacing": "0.01em", "fontWeight": "600" }], "body-md": ["0.9375rem", { "lineHeight": "1.5rem", "fontWeight": "400" }] } } } };</script></head><body class="bg-surface font-body-md text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-20 py-2 px-margin-mobile flex items-center justify-between gap-2"><div class="flex items-center gap-space-sm min-w-0 flex-1"><img alt="Suba-Arana authentic Sri Lankan hospitality brand logo featuring an elegant golden blooming lotus petal motif, traditional Liya-wela floral curves, and refined typography.. Brand logo. - Primary color: #183b2b
+- Font: playfairDisplay
+- Mode: light
+- Roundness: rounded-md
+" class="h-14 w-auto object-contain flex-shrink-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBn9-tfmDQGpubnJWgnbBd367LiHs_fB9niRiAzH8v5lz5iasjgubtueXS-jhJ9Tkz-qEA2NzTUKDJuimBoTtOL14ou64CWJnBJW6RqlI3m700cdOso4vbLmNmymwij2ElZWqav18ArbmXCsZP1gs0xo2TxQ6RHUWeLsXXxXttAZwVYTXum_WoFdiV2Qh2_rxmd3mH8z4qKnB1C3keL-AO_bvGcmnabqqtsBPGTg2hoPZG5-1SHRE54cHEhNZcxu3n5FA"><div class="flex flex-col min-w-0"><div class="flex items-center gap-1 leading-none flex-wrap"><span class="font-headline-sm text-headline-sm text-primary leading-tight tracking-tight whitespace-nowrap"><span style="color: rgb(24, 59, 43); white-space: normal;" class="">සුභ-අරණ</span></span><span class="font-label-caps text-label-caps text-secondary font-bold tracking-wider leading-none ml-0.5 whitespace-nowrap"><span style="font-family: &quot;Noto Sans Sinhala&quot;, &quot;Plus Jakarta Sans&quot;, sans-serif; letter-spacing: 0.55px; text-transform: uppercase; white-space: normal;" class="">ආයුබෝවන්</span></span></div></div></div><div class="flex items-center gap-1.5 flex-shrink-0"><button aria-label="Currency and Language Selection" class="h-8 px-1.5 py-0.5 flex items-center gap-0.5 rounded-full text-on-surface-variant hover:text-primary transition-colors bg-surface-container-high/60"><span class="material-symbols-outlined text-[16px] text-secondary">payments</span><span class="font-label-md text-[11px] text-on-surface">LKR</span><span class="font-label-md text-[11px] text-outline">|</span><span class="font-label-md text-[11px] text-on-surface font-bold">EN</span></button><button aria-label="Notifications" class="w-9 h-9 flex items-center justify-center rounded-full text-on-surface hover:text-primary transition-colors"><span class="material-symbols-outlined text-[20px]">notifications</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center ml-0.5"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex flex-col relative w-full bg-surface min-h-screen" style="padding-top: 5rem;"><div class="flex flex-col w-full">
+<!-- Image Carousel Section -->
+<div class="relative w-full aspect-[4/3] bg-surface-container-high overflow-hidden">
+<div class="flex w-full h-full transition-transform duration-500 ease-out" id="gallery-container">
+<div class="w-full h-full flex-shrink-0 relative">
+<img class="w-full h-full object-cover" data-alt="Stunning colonial-era stone and teak wood heritage villa veranda overlooking misty emerald terraced tea hills in Sri Lanka Knuckles Range, with woven cane lounge chairs, brass lotus oil lamps, morning golden sunlight mist, warm earthy atmosphere" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8hgPdRDFYG0UruF_V2LIsGy4P92EH6RBhrpjbEgp8uis8ekw2fmi4DduFLFD8xx3oF3Fa-67Z2wWP8SO4XWrvN_V6ULHW_xiFPa7IaP0eo6h1dJyywxBTdKdJd-TcMyhcMECt60JajqiavaXVaEPypk_JtdqY0rSf3FbNN3LjAbGM1GjJVpHiNU0mAdNHT8lkpH2B34dmfEeddtvV9pL9J3M6OIx0wx4QdWqib1wJ">
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-primary/30"></div>
+</div>
+<div class="w-full h-full flex-shrink-0 relative">
+<img class="w-full h-full object-cover" data-alt="Cozy sunlit bedroom inside Sri Lankan heritage homestay with carved four poster jackwood bed, pure white linen, handwoven terracotta throws, framed botanical spices art, vintage open shutter windows looking over green tea plantations" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcwNaaqRtNP_LeR68QAuy7Yr4UlLQh6Hp0WVvjX9FVdZ9zUxSpmQzsVaZSn9lRH0MmrP5V-uXSf7Em9bdIi_G-q9RRUINEB8XoNv7lt-bhf1N_uCEUKt9Mq_YL8jNRg1Rdf8TP1ph0eaMmfmF6BzlL_NdcL07VvK94AvcFQG27P5D6GRs1yXfN6sq4osz15wVvfa42BnuWcLpyb6wBfQByhN-3vlmsg45TS6611nGL">
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-primary/30"></div>
+</div>
+<div class="w-full h-full flex-shrink-0 relative">
+<img class="w-full h-full object-cover" data-alt="Traditional Sri Lankan earthen open-air hearth with bubbling clay pots on woodfire, fresh king coconuts, fragrant pandan leaves, organic heirloom red rice, and warm morning rays lighting the rustic kitchen" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfW5PcjSDA_H4Y90kmmy1DmvTVJXnYMCQlC5BX2vtyQV1FKsS0_VZrCV9YlA3tYyiJnO01mLOwCVOucAoCOCEEninPf-Br5J3wS0kvUZ-eteEjrNXtYTawEHkmsmW7gA-Vzh3xcKIGf6NP0DKns-j9iM-IrTyXaUNxek0a36xyrR9Wyy3SSWjQG1A7Q_h9iY6aPu-WT0xQYgTKdAOJMOrN43U0iJctUcLWmK7kT6cv">
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-primary/30"></div>
+</div>
+</div>
+<!-- Floating Top Badges -->
+<div class="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none z-10">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface/90 backdrop-blur-md text-on-surface font-label-md text-label-md shadow-sm pointer-events-auto">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+        Superhost Sanctuary
+      </span>
+<button aria-label="Save to Wishlist" class="w-10 h-10 rounded-full bg-surface/90 backdrop-blur-md flex items-center justify-center text-primary shadow-sm active:scale-95 transition-all pointer-events-auto" id="wishlist-btn" onclick="toggleWishlist(this)">
+<span class="material-symbols-outlined text-[20px] transition-colors" id="wishlist-icon">favorite_border</span>
+</button>
+</div>
+<!-- Photo Counter Indicator & Prev/Next Micro Buttons -->
+<div class="absolute bottom-4 left-4 right-4 flex items-center justify-between text-on-primary pointer-events-none">
+<div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/70 backdrop-blur-md font-label-md text-label-md tracking-wider">
+<span class="material-symbols-outlined text-[14px]">photo_camera</span>
+<span id="photo-counter" class="">1 / 18</span>
+</div>
+<div class="flex items-center gap-2 pointer-events-auto">
+<button aria-label="Previous Photo" class="w-8 h-8 rounded-full bg-primary/60 backdrop-blur-md flex items-center justify-center text-on-primary hover:bg-primary/90 transition-colors" onclick="prevSlide()">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button aria-label="Next Photo" class="w-8 h-8 rounded-full bg-primary/60 backdrop-blur-md flex items-center justify-center text-on-primary hover:bg-primary/90 transition-colors" onclick="nextSlide()">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Content Container -->
+<div class="px-margin-mobile pt-5 pb-28 flex flex-col gap-6">
+<!-- Property Header Info -->
+<div class="flex flex-col gap-2">
+<!-- Cultural Heritage Pill -->
+<div class="flex items-center gap-2 flex-wrap">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-caps text-label-caps uppercase">
+<span class="material-symbols-outlined text-[13px]">history_edu</span>
+          Heritage Estate • Est. 1928
+        </span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-caps text-label-caps uppercase">
+<span class="material-symbols-outlined text-[13px]">eco</span>
+          Zero Plastic
+        </span>
+</div>
+<!-- Title & Location -->
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface leading-tight">
+        The Kandy &amp; Knuckles Heritage Homestay
+      </h2>
+<div class="flex items-center gap-1.5 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[18px] text-secondary">location_on</span>
+<span class="">Deltota Valley, Knuckles Mountain Foothills, Sri Lanka</span>
+</div>
+<!-- Rating Bar -->
+<div class="flex items-center gap-3 pt-1">
+<div class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-secondary-fixed text-on-secondary-fixed">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-lg text-label-lg">4.96</span>
+</div>
+<span class="text-on-surface font-label-md text-label-md underline underline-offset-4 cursor-pointer">
+          168 guest stories
+        </span>
+<span class="text-outline-variant">•</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm">Top 1% in Central Province</span>
+</div>
+</div>
+<!-- Host Welcome Card -->
+<div class="p-4 rounded-xl bg-surface-container flex items-center justify-between gap-4 shadow-sm">
+<div class="flex items-center gap-3 min-w-0">
+<div class="relative flex-shrink-0">
+<img class="w-14 h-14 rounded-full object-cover" data-alt="Warm smiling Sri Lankan couple in traditional organic cotton batik linen, tea estate homestead hosts Bandara and Champika, warm outdoor natural light garden background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDm0Z5R6-sLl-CVdvPx4hwYjj59AlLqZR6kNQ7MJJ4NTDpu67JD8zri2iJgiK2ILk5iLuL4O1IOJFnEUMvaFuqny7itLLEXdLFmHixA_Xv4TgiuXtpQNCyAcwawpE09nG4RGvObZdesfhCe6AORb-S0gNOg2kBUFesLFSbHXf1Q5-e5TLza1wd_LNTCu8vZKtolJdedo5pmEKekHnMuPyUc5UlC5hDOb_RxZ3WaJtFs">
+<div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-primary text-on-primary flex items-center justify-center shadow">
+<span class="material-symbols-outlined text-[12px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-caps text-label-caps text-secondary uppercase tracking-wider">Estate Guardians</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface truncate">Meet Bandara &amp; Champika</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Responds &lt; 1 hr • English &amp; Sinhala</p>
+</div>
+</div>
+<button aria-label="Message Host" class="flex-shrink-0 w-9 h-9 rounded-full bg-surface flex items-center justify-center text-primary shadow-sm hover:bg-surface-container-high transition-colors" onclick="openHostModal()">
+<span class="material-symbols-outlined text-[18px]">forum</span>
+</button>
+</div>
+<!-- Curated Stay Highlights -->
+<div class="flex flex-col gap-3">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">The Knuckles Living Experience</h3>
+<div class="grid grid-cols-1 gap-2.5">
+<div class="p-3.5 rounded-xl bg-surface-container-low flex items-start gap-3.5">
+<div class="w-10 h-10 rounded-lg bg-secondary-container text-on-secondary-container flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[22px]">skillet</span>
+</div>
+<div class="flex flex-col">
+<h4 class="font-label-lg text-label-lg text-on-surface">Farm-to-Table Earthen Feasts</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Heirloom Kurakkan, spicy garden polos (baby jackfruit), hand-pounded coconut sambol cooked over cinnamon wood fires.</p>
+</div>
+</div>
+<div class="p-3.5 rounded-xl bg-surface-container-low flex items-start gap-3.5">
+<div class="w-10 h-10 rounded-lg bg-primary-container text-on-primary-container flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[22px]">hiking</span>
+</div>
+<div class="flex flex-col">
+<h4 class="font-label-lg text-label-lg text-on-surface">Private Knuckles Ridge Expeditions</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Bandara accompanies guests along hidden cloud-forest trails, secluded natural waterfall plunges, and endemic bird corridors.</p>
+</div>
+</div>
+<div class="p-3.5 rounded-xl bg-surface-container-low flex items-start gap-3.5">
+<div class="w-10 h-10 rounded-lg bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[22px]">spa</span>
+</div>
+<div class="flex flex-col">
+<h4 class="font-label-lg text-label-lg text-on-surface">Ayurvedic Herbal Rest &amp; Plunge</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Infused garden botanicals, herbal steam therapy, and unhurried meditation on the mist-kissed granite pavilion.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Select Suite / Room Type -->
+<div class="flex flex-col gap-3.5">
+<div class="flex items-center justify-between">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Choose Your Sanctuary</h3>
+<span class="font-label-md text-label-md text-secondary">3 Rooms Available</span>
+</div>
+<!-- Room Option 1 (Selected) -->
+<div class="p-4 rounded-xl bg-surface-container-lowest shadow-sm flex flex-col gap-3 cursor-pointer transition-all ring-inset ring-2 ring-primary" id="room-card-1" onclick="selectRoom(1, 85, 'Deluxe Mountain Veranda Suite')">
+<div class="flex justify-between items-start">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-secondary uppercase">Featured Choice</span>
+<h4 class="font-headline-sm text-headline-sm text-on-surface">Deluxe Mountain Veranda Suite</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">King Jackwood Bed • Valley Panoramas • Private Sit-out</p>
+</div>
+<div class="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-on-primary" id="room-check-1">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant font-label-md text-label-md">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">bed</span> 2 Guests</span>
+<span class="">•</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">bathtub</span> Deep Copper Tub</span>
+<span class="">•</span>
+<span class="flex items-center gap-1 text-primary"><span class="material-symbols-outlined text-[16px]">restaurant</span> Breakfast Included</span>
+</div>
+<div class="flex items-baseline justify-between pt-1">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Includes all local taxes</span>
+<div class="text-right">
+<span class="font-headline-md text-headline-md text-on-surface">$85</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant"> / night</span>
+</div>
+</div>
+</div>
+<!-- Room Option 2 -->
+<div class="p-4 rounded-xl bg-surface-container-lowest shadow-sm flex flex-col gap-3 cursor-pointer transition-all" id="room-card-2" onclick="selectRoom(2, 65, 'Ancestral Garden Room')">
+<div class="flex justify-between items-start">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-outline uppercase">Quiet Solitude</span>
+<h4 class="font-headline-sm text-headline-sm text-on-surface">Ancestral Garden Room</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Queen Brass Bed • Spice Grove Courtyard • Rain Shower</p>
+</div>
+<div class="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center text-transparent" id="room-check-2">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant font-label-md text-label-md">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">bed</span> 2 Guests</span>
+<span class="">•</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">nature</span> Garden View</span>
+<span class="">•</span>
+<span class="flex items-center gap-1 text-primary"><span class="material-symbols-outlined text-[16px]">restaurant</span> Breakfast Included</span>
+</div>
+<div class="flex items-baseline justify-between pt-1">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Includes all local taxes</span>
+<div class="text-right">
+<span class="font-headline-md text-headline-md text-on-surface">$65</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant"> / night</span>
+</div>
+</div>
+</div>
+<!-- Room Option 3 -->
+<div class="p-4 rounded-xl bg-surface-container-lowest shadow-sm flex flex-col gap-3 cursor-pointer transition-all" id="room-card-3" onclick="selectRoom(3, 110, 'Family Attic Chalet')">
+<div class="flex justify-between items-start">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-outline uppercase">Upper Loft</span>
+<h4 class="font-headline-sm text-headline-sm text-on-surface">Family Attic Chalet</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">1 King + 2 Singles • Stargazing Skylight • Timber Beams</p>
+</div>
+<div class="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center text-transparent" id="room-check-3">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant font-label-md text-label-md">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">group</span> 4 Guests</span>
+<span class="">•</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">landscape</span> Ridge Vistas</span>
+<span class="">•</span>
+<span class="flex items-center gap-1 text-primary"><span class="material-symbols-outlined text-[16px]">restaurant</span> Breakfast Included</span>
+</div>
+<div class="flex items-baseline justify-between pt-1">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Includes all local taxes</span>
+<div class="text-right">
+<span class="font-headline-md text-headline-md text-on-surface">$110</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant"> / night</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Authentic Homestay Amenities -->
+<div class="flex flex-col gap-3">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Curated Homestay Amenities</h3>
+<div class="grid grid-cols-2 gap-2.5">
+<div class="p-3 rounded-lg bg-surface-container flex items-center gap-2.5">
+<span class="material-symbols-outlined text-secondary text-[20px]">outdoor_grill</span>
+<span class="font-body-sm text-body-sm text-on-surface">Clay Oven Cookery</span>
+</div>
+<div class="p-3 rounded-lg bg-surface-container flex items-center gap-2.5">
+<span class="material-symbols-outlined text-secondary text-[20px]">local_cafe</span>
+<span class="font-body-sm text-body-sm text-on-surface">Estate Pekoe Teas</span>
+</div>
+<div class="p-3 rounded-lg bg-surface-container flex items-center gap-2.5">
+<span class="material-symbols-outlined text-secondary text-[20px]">self_improvement</span>
+<span class="font-body-sm text-body-sm text-on-surface">Sunrise Yoga Deck</span>
+</div>
+<div class="p-3 rounded-lg bg-surface-container flex items-center gap-2.5">
+<span class="material-symbols-outlined text-secondary text-[20px]">wifi</span>
+<span class="font-body-sm text-body-sm text-on-surface">100 Mbps Starlink</span>
+</div>
+<div class="p-3 rounded-lg bg-surface-container flex items-center gap-2.5">
+<span class="material-symbols-outlined text-secondary text-[20px]">shower</span>
+<span class="font-body-sm text-body-sm text-on-surface">Rainwater Shower</span>
+</div>
+<div class="p-3 rounded-lg bg-surface-container flex items-center gap-2.5">
+<span class="material-symbols-outlined text-secondary text-[20px]">local_parking</span>
+<span class="font-body-sm text-body-sm text-on-surface">Complimentary Parking</span>
+</div>
+</div>
+</div>
+<!-- Valley Neighborhood Map Card -->
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">The Foothills Neighborhood</h3>
+<span class="font-label-md text-label-md text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">navigation</span>
+          Ella-Kandy Railway • 35m
+        </span>
+</div>
+<div class="relative rounded-xl overflow-hidden shadow-sm">
+<div class="w-full h-44 bg-cover bg-center" data-location="Knuckles Mountain Range, Deltota, Kandy, Sri Lanka" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB0X2kN60k1273aZdM_2olbY693qjb-N1R-0Fw4rmBwFOX0osJrY7rMmBK2djvCkdchS8KfkSL_t89LtSjAJ57zZBM9DLWpVZ8GdykhQ65n5hVTtUpQhCO91tMPc8rdBiIg74L6hwmhSyo93gWiKB6LBKDRBXStPBYUXaba9XS3gOMuDex4wFmaVz0UX9x-jwxTZDRPpG-cAcKG24UmV4YUtyqBcs373FgwyLWN9PLj')"></div>
+<div class="absolute inset-0 bg-primary/20 pointer-events-none"></div>
+<!-- Floating Location Anchor -->
+<div class="absolute bottom-3 left-3 right-3 p-3 rounded-lg bg-surface/95 backdrop-blur-md shadow-md flex items-center justify-between">
+<div class="flex items-center gap-2.5 min-w-0">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[18px]">forest</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-lg text-label-lg text-on-surface truncate">Knuckles World Heritage Reserve</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">8 min trail walk from your veranda gate</span>
+</div>
+</div>
+<button class="px-3 py-1.5 rounded-full bg-surface-container text-primary font-label-md text-label-md hover:bg-surface-container-high transition-colors">
+            Directions
+          </button>
+</div>
+</div>
+</div>
+<!-- Authentic Guest Impressions -->
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Traveler Impressions</h3>
+<span class="font-label-md text-label-md text-secondary underline cursor-pointer">Read all 168</span>
+</div>
+<div class="flex flex-col gap-3">
+<!-- Review 1 -->
+<div class="p-4 rounded-xl bg-surface-container-low flex flex-col gap-2.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<img class="w-9 h-9 rounded-full object-cover" data-alt="Profile portrait of gentle smiling female traveler Elena from France wearing linen scarf against sunlit outdoor nature backdrop" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtxpOpFuAMv01p7RgxYxyw2TmFGVa-R66-i-xiLzicMkbMj3ti31bK2iskLmlZf39qydkNl3vJqeiXW-y5y_tPi1jxrEaF_eJEK23g0Wr8-9hODqhwRTQU3UEOPpk3O51GxV9TQQd8iOCXuuxwI8-GvdAAOZ8oU33DObtGNBw194wl6iuyuE58OX1khCOF5YpslFreuyUQYoaltcXsgqoxgk7VE8m8Y9fsbZi1mQ2v">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-on-surface">Elena Rostova</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Stayed Oct 2024 • Zurich</span>
+</div>
+</div>
+<div class="flex items-center text-secondary">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant italic">
+            “Waking up to mist curling over the Knuckles range with fresh lemongrass tea made by Champika was pure magic. Bandara showed us secret crystal pools no tourist ever visits.”
+          </p>
+</div>
+<!-- Review 2 -->
+<div class="p-4 rounded-xl bg-surface-container-low flex flex-col gap-2.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<img class="w-9 h-9 rounded-full object-cover" data-alt="Profile portrait of male eco-traveler Marcus with warm bearded smile in outdoor safari shirt, soft light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUfLx9AkHcnBJvSctN069hbMDVo9f04pn0BKFbV24eQ_AXRnS57qajwp7PiY8dEiBKMRxzQKovwMtlS3qGdADdSiVJFfqpTKMWzpfvNEWaZlqH-YE1oER8y6xhtlgq0xEY6obIT4O8oOZ8ZVlHln0SLpyXo4dZ5YHFHHyF1fb-nn23xoT8MbHjK85ApAIC3qsXkPIJ5btvgrb6Mi3MYAOFj9fNxT_x26wcHbKyxXk9">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-on-surface">Marcus Vance</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Stayed Sep 2024 • Melbourne</span>
+</div>
+</div>
+<div class="flex items-center text-secondary">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant italic">
+            “Far away from crowded tourist hotels. Pure dignity, sacred silence, and the most delicious heirloom coconut rotis. An unforgettable Sri Lankan sanctuary.”
+          </p>
+</div>
+</div>
+</div>
+<!-- House Sanctuary Policies Snippet -->
+<div class="p-4 rounded-xl bg-surface-container flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary text-[24px]">verified_user</span>
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-on-surface">Free Cancellation</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Full refund up to 48 hours prior to check-in</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">chevron_right</span>
+</div>
+</div>
+<!-- Sticky Bottom Reserve Bar -->
+<div class="fixed bottom-0 left-0 right-0 z-40 bg-surface/95 backdrop-blur-xl pb-safe shadow-[0_-4px_24px_rgba(0,37,23,0.08)]">
+<div class="px-margin-mobile py-3 flex items-center justify-between gap-4">
+<div class="flex flex-col min-w-0">
+<div class="flex items-baseline gap-1">
+<span class="font-headline-md text-headline-md text-on-surface" id="bar-price">$85</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">/ night</span>
+</div>
+<span class="font-label-md text-label-md text-secondary truncate max-w-[140px]" id="bar-room-name">
+          Deluxe Mountain Veranda
+        </span>
+</div>
+<button class="flex-1 max-w-[210px] h-12 rounded-full bg-secondary text-on-secondary font-label-lg text-label-lg shadow-md active:scale-95 transition-all flex items-center justify-center gap-2" onclick="triggerBookingReservation()">
+<span class="">Reserve Stay</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Micro Interaction Toast Confirmation (Initially hidden) -->
+<div class="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-full bg-primary text-on-primary font-label-md text-label-md shadow-xl flex items-center gap-2 opacity-0 pointer-events-none transition-all duration-300 transform -translate-y-2" id="reserve-toast">
+<span class="material-symbols-outlined text-[18px] text-secondary-fixed">check_circle</span>
+<span id="toast-text" class="">Selected Suite Reserved! Proceeding to Dates...</span>
+</div>
+</div>
+<script>
+  let currentSlide = 0;
+  const totalSlides = 3;
+  let selectedPrice = 85;
+  let selectedTitle = 'Deluxe Mountain Veranda Suite';
+
+  function updateSlide() {
+    const container = document.getElementById('gallery-container');
+    const counter = document.getElementById('photo-counter');
+    if (container && counter) {
+      container.style.transform = `translateX(-${currentSlide * 100}%)`;
+      counter.innerText = `${currentSlide + 1} / 18`;
+    }
+  }
+
+  function nextSlide() {
+    currentSlide = (currentSlide + 1) % totalSlides;
+    updateSlide();
+  }
+
+  function prevSlide() {
+    currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+    updateSlide();
+  }
+
+  function toggleWishlist(btn) {
+    const icon = document.getElementById('wishlist-icon');
+    if (icon) {
+      if (icon.innerText === 'favorite_border') {
+        icon.innerText = 'favorite';
+        icon.style.fontVariationSettings = "'FILL' 1";
+        icon.classList.add('text-error');
+        showToast('Saved to Knuckles Wishlist');
+      } else {
+        icon.innerText = 'favorite_border';
+        icon.style.fontVariationSettings = "'FILL' 0";
+        icon.classList.remove('text-error');
+        showToast('Removed from Wishlist');
+      }
+    }
+  }
+
+  function selectRoom(id, price, name) {
+    selectedPrice = price;
+    selectedTitle = name;
+
+    // Reset styles
+    for (let i = 1; i <= 3; i++) {
+      const card = document.getElementById(`room-card-${i}`);
+      const check = document.getElementById(`room-check-${i}`);
+      if (card && check) {
+        if (i === id) {
+          card.classList.add('ring-2', 'ring-primary');
+          check.className = 'w-6 h-6 rounded-full bg-primary flex items-center justify-center text-on-primary';
+        } else {
+          card.classList.remove('ring-2', 'ring-primary');
+          check.className = 'w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center text-transparent';
+        }
+      }
+    }
+
+    // Update bottom bar
+    const barPrice = document.getElementById('bar-price');
+    const barName = document.getElementById('bar-room-name');
+    if (barPrice) barPrice.innerText = `$${price}`;
+    if (barName) barName.innerText = name;
+  }
+
+  function triggerBookingReservation() {
+    showToast(`Reserving ${selectedTitle} ($${selectedPrice}/nt)`);
+  }
+
+  function openHostModal() {
+    showToast('Connecting directly with Bandara & Champika...');
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('reserve-toast');
+    const text = document.getElementById('toast-text');
+    if (toast && text) {
+      text.innerText = msg;
+      toast.classList.remove('opacity-0', 'pointer-events-none', '-translate-y-2');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'pointer-events-none', '-translate-y-2');
+        toast.classList.remove('opacity-100', 'translate-y-0');
+      }, 2500);
+    }
+  }
+</script></main>
+
+</body></html>
