@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import api from '../api/axios';
 import './dashboards.css';
+import { getImageUrl } from '../utils/imageUrl';
 
 const money = (value) => `LKR ${Number(value || 0).toLocaleString('en-LK')}`;
 const date = (value) => value ? new Date(value).toLocaleDateString('en-LK', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
@@ -21,6 +22,7 @@ export default function GuestDashboard({ onNavigateHome, onViewProperty, onLogou
   const [error, setError] = useState('');
   const [query, setQuery] = useState('');
   const [busyId, setBusyId] = useState('');
+  const [bookingFilter, setBookingFilter] = useState('All');
 
   const user = useMemo(() => {
     try { return JSON.parse(localStorage.getItem('user') || 'null'); } catch { return null; }
@@ -50,6 +52,30 @@ export default function GuestDashboard({ onNavigateHome, onViewProperty, onLogou
   const saved = listings.filter((item) => favorites.includes(item._id));
   const filteredSaved = saved.filter((item) => `${item.name} ${item.location}`.toLowerCase().includes(query.toLowerCase()));
   const pending = bookings.filter((b) => b.bookingStatus === 'Pending').length;
+ const bookingFilters = [
+  'All',
+  'Pending',
+  'Confirmed',
+  'Declined',
+  'Cancelled'
+];
+
+const filteredBookings = bookings
+  .filter((booking) =>
+    bookingFilter === 'All' ||
+    booking.bookingStatus === bookingFilter
+  )
+  .sort((a, b) =>
+    new Date(b.createdAt) - new Date(a.createdAt)
+  );
+
+const bookingCounts = {
+  All: bookings.length,
+  Pending: bookings.filter(b => b.bookingStatus === 'Pending').length,
+  Confirmed: bookings.filter(b => b.bookingStatus === 'Confirmed').length,
+  Declined: bookings.filter(b => b.bookingStatus === 'Declined').length,
+  Cancelled: bookings.filter(b => b.bookingStatus === 'Cancelled').length
+};
   const totalSpent = bookings.filter((b) => String(b.paymentStatus || '').startsWith('Paid')).reduce((sum, b) => sum + Number(b.totalPrice || 0), 0);
 
   const cancelBooking = async (booking) => {
@@ -74,9 +100,16 @@ export default function GuestDashboard({ onNavigateHome, onViewProperty, onLogou
     <div className="sa-dashboard">
       <header className="sa-dash-nav">
         <button className="sa-brand" onClick={onNavigateHome} aria-label="Suba-Arana home">
-          <span className="sa-brand-mark"><Home size={19}/></span>
-          <span><strong>Suba-Arana</strong><small>TRAVELER PORTAL</small></span>
-        </button>
+  <img
+    src="/suba-arana-emblem.png"
+    alt="Suba-Arana Logo"
+    className="sa-dashboard-logo"
+  />
+  <span className="sa-brand-copy">
+    <strong>Suba-Arana</strong>
+    <small>සුබ අරණ · ශ්‍රී ලාංකීය නවාතැන්</small>
+  </span>
+</button>
         <div className="sa-nav-right">
           <button className="sa-nav-link" onClick={onNavigateHome}><Compass size={16}/> Explore stays</button>
           <span className="sa-avatar">{(user?.name || 'G').slice(0,1).toUpperCase()}</span>
@@ -110,11 +143,53 @@ export default function GuestDashboard({ onNavigateHome, onViewProperty, onLogou
             </section>
           </>}
 
-          {tab === 'trips' && <section className="sa-panel">
-            <div className="sa-panel-heading"><div><span className="sa-kicker">YOUR RESERVATIONS</span><h2>My trips</h2></div><span className="sa-muted">{upcoming.length} upcoming · {past.length} past</span></div>
-            <div className="sa-trip-list">{upcoming.length ? upcoming.map((booking) => <BookingCard key={booking._id} booking={booking} onCancel={cancelBooking} busy={busyId === booking._id}/>) : <EmptyState title="Nothing planned just yet" text="Browse local stays and send a booking request directly to a host." action="Find a stay" onClick={onNavigateHome}/>}</div>
-            {past.length > 0 && <><div className="sa-subheading"><h3>Past reservations</h3></div><div className="sa-trip-list">{past.map((booking) => <BookingCard key={booking._id} booking={booking} compact/>)}</div></>}
-          </section>}
+        {tab === 'trips' && (
+  <section className="sa-booking-history">
+    <div className="sa-history-heading">
+      <div>
+        <span className="sa-kicker">YOUR RESERVATIONS</span>
+        <h2>Booking History</h2>
+        <p>All your Sri Lankan stays in one peaceful place.</p>
+      </div>
+      <span className="sa-history-total">
+        {bookings.length} total bookings
+      </span>
+    </div>
+
+    <div className="sa-booking-filters">
+      {bookingFilters.map((filter) => (
+        <button
+          key={filter}
+          className={bookingFilter === filter ? 'active' : ''}
+          onClick={() => setBookingFilter(filter)}
+        >
+          {filter}
+          <span>{bookingCounts[filter]}</span>
+        </button>
+      ))}
+    </div>
+
+    {filteredBookings.length > 0 ? (
+      <div className="sa-history-list">
+        {filteredBookings.map((booking) => (
+          <BookingCard
+            key={booking._id}
+            booking={booking}
+            onCancel={cancelBooking}
+            busy={busyId === booking._id}
+          />
+        ))}
+      </div>
+    ) : (
+      <EmptyState
+        title="No bookings found"
+        text={`You don't have any ${bookingFilter.toLowerCase()} bookings yet.`}
+        action="Explore stays"
+        onClick={onNavigateHome}
+      />
+    )}
+  </section>
+)}
 
           {tab === 'saved' && <section className="sa-panel">
             <div className="sa-panel-heading"><div><span className="sa-kicker">YOUR WISH LIST</span><h2>Saved stays</h2></div><label className="sa-search"><Search size={16}/><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search saved stays"/></label></div>
@@ -132,9 +207,30 @@ function BookingCard({ booking, onCancel, busy, compact = false }) {
   const host = booking.hostId || {};
   const status = booking.bookingStatus || 'Pending';
   return <article className={`sa-trip-card ${compact ? 'compact' : ''}`}>
-    <img src={listing.image || imageFallback} alt={listing.name || 'Homestay'}/>
-    <div className="sa-trip-info"><div className="sa-trip-title-row"><h3>{listing.name || 'Homestay reservation'}</h3><span className={`sa-status ${status.toLowerCase().replace(/\s/g,'-')}`}>{status}</span></div><p><MapPin size={14}/>{listing.location || 'Sri Lanka'} <span>·</span> {listing.roomType || listing.type || 'Local stay'}</p><p><CalendarDays size={14}/>{date(booking.checkIn)} – {date(booking.checkOut)}</p>{!compact && <p><Users size={14}/>Host: {host.fullName || 'Your host'}</p>}</div>
-    <div className="sa-trip-side"><strong>{money(booking.totalPrice)}</strong><small>{booking.paymentStatus || 'Awaiting Payment'}</small>{onCancel && ['Pending','Confirmed'].includes(status) && <button className="sa-outline-btn" onClick={() => onCancel(booking)} disabled={busy}>{busy ? 'Updating…' : 'Cancel request'}</button>}</div>
+   <img
+  src={getImageUrl(listing.image) || imageFallback}
+  alt={listing.name || 'Homestay'}
+  onError={(e) => {
+    e.currentTarget.onerror = null;
+    e.currentTarget.src = imageFallback;
+  }}
+/>
+    <div className="sa-trip-info"><div className="sa-trip-title-row"><h3>{listing.name || 'Homestay reservation'}</h3><span className={`sa-status ${status.toLowerCase().replace(/\s/g,'-')}`}>{status}</span></div><p><MapPin size={14}/>{listing.location || 'Sri Lanka'} <span>·</span> {listing.roomType || listing.type || 'Local stay'}</p><p><CalendarDays size={14}/>{date(booking.checkIn)} – {date(booking.checkOut)}</p>
+    <p>
+  <Clock3 size={14}/>
+  Requested on: {date(booking.createdAt)}
+</p>{!compact && <p><Users size={14}/>Host: {host.fullName || 'Your host'}</p>}</div>
+    <div className="sa-trip-side"><strong>{money(booking.totalPrice)}</strong><small>{booking.paymentStatus || 'Awaiting Payment'}</small>
+{onCancel && status === 'Pending' && (
+  <button
+    className="sa-outline-btn"
+    onClick={() => onCancel(booking)}
+    disabled={busy}
+  >
+    {busy ? 'Updating…' : 'Cancel request'}
+  </button>
+)}
+</div>
   </article>;
 }
 

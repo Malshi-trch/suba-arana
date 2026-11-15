@@ -71,7 +71,17 @@ export default function AdminDashboard({onLogout,onNavigateHome}) {
 
   return <div className="sa-dashboard sa-admin-dashboard">
     <header className="sa-dash-nav sa-admin-nav">
-      <button className="sa-brand" onClick={onNavigateHome}><span className="sa-brand-mark"><ShieldCheck size={19}/></span><span><strong>Suba-Arana</strong><small>ADMINISTRATION</small></span></button>
+<button className="sa-brand" onClick={onNavigateHome} aria-label="Suba-Arana home">
+  <img
+    src="/suba-arana-emblem.png"
+    alt="Suba-Arana Logo"
+    className="sa-dashboard-logo"
+  />
+  <span className="sa-brand-copy">
+    <strong>Suba-Arana</strong>
+    <small>සුබ අරණ · ශ්‍රී ලාංකීය නවාතැන්</small>
+  </span>
+</button>
       <div className="sa-nav-right"><span className="sa-admin-pill"><span/> SYSTEM ADMIN</span><span className="sa-avatar">{(user?.name||'A').slice(0,1).toUpperCase()}</span><span className="sa-nav-user">{user?.name||'Administrator'}</span><button className="sa-icon-button" onClick={onLogout} title="Sign out"><LogOut size={18}/></button></div>
     </header>
     <main className="sa-dash-main">

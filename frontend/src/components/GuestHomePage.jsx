@@ -3,6 +3,7 @@ import axios from 'axios';
 import {
   Search, MapPin, Calendar, SlidersHorizontal, Heart, Star, LayoutGrid, Map, CheckCircle2, X, BedDouble, Navigation, User, Globe2
 } from 'lucide-react';
+import { getImageUrl } from '../utils/imageUrl';
 
 const FACILITY_OPTIONS = [
   'Free Wi-Fi',
@@ -12,7 +13,12 @@ const FACILITY_OPTIONS = [
   'Mountain View'
 ];
 
-export default function GuestHomePage({ onNavigateToLogin, onNavigateToRegister }) {
+
+export default function GuestHomePage({
+  onNavigateToLogin,
+  onNavigateToRegister,
+  onViewProperty
+}) {
   // 1. STATE: Dynamic Property Data from MongoDB
   const [properties, setProperties] = useState([]);
   const [isLoadingProperties, setIsLoadingProperties] = useState(true);
@@ -176,13 +182,18 @@ export default function GuestHomePage({ onNavigateToLogin, onNavigateToRegister 
       alert('Failed to submit booking. Please try again later.');
     }
   };
-
+   const fallback =
+  'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=900&q=80';
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <header className="sa-site-header sticky top-0 z-30">
         <div className="sa-nav-inner">
           <button type="button" className="sa-brand" onClick={resetFilters} aria-label="Suba-Arana home">
-            <img src="/suba-arana-emblem.png" alt="Suba-Arana Sri Lankan heritage pavilion emblem" />
+<img
+  src="/suba-arana-emblem.png"
+  alt="Suba-Arana Logo"
+  className="sa-dashboard-logo"
+/>
             <span className="sa-brand-copy">
               <strong>Suba-Arana</strong>
               <small>සුබ අරණ · ශ්‍රී ලාංකීය නවාතැන්</small>
@@ -384,7 +395,14 @@ export default function GuestHomePage({ onNavigateToLogin, onNavigateToRegister 
                   return (
                     <div key={property._id} className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden flex flex-col">
                       <div className="relative h-52 w-full bg-slate-200">
-                        <img src={property.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=900&q=80'} alt={property.name} className="w-full h-full object-cover" />
+                    <img
+                      src={getImageUrl(property.image) || fallback}                      alt={property.name || 'Sri Lankan Homestay'}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = fallback;
+                      }}
+                    />
                         <span className="absolute top-3 left-3 bg-emerald-950/85 text-amber-300 text-xs font-semibold px-3 py-1 rounded-full">{property.type}</span>
                         <button type="button" onClick={() => toggleFavorite(property._id)} className="absolute top-3 right-3 p-2 rounded-full bg-white/90 shadow-md cursor-pointer">
                           <Heart className={`w-4 h-4 ${isFav ? 'fill-rose-500 text-rose-500' : 'text-slate-600'}`} />
@@ -441,6 +459,15 @@ export default function GuestHomePage({ onNavigateToLogin, onNavigateToRegister 
             <div className="flex justify-between items-start mb-4">
               <div>
                 <span className="text-xs font-bold uppercase text-emerald-700">Direct Booking Request</span>
+                <img
+                   src={getImageUrl(selectedPropertyForBooking.image) || fallback}
+                    alt={selectedPropertyForBooking.name}
+                    className="w-full h-40 object-cover rounded-xl mb-3"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = fallback;
+                    }}
+                  />
                 <h3 className="text-lg font-bold text-slate-900">{selectedPropertyForBooking.name}</h3>
                 <p className="text-xs text-slate-500">{selectedPropertyForBooking.roomType} • LKR {selectedPropertyForBooking.basePrice.toLocaleString()} / night</p>
               </div>

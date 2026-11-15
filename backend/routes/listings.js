@@ -1,8 +1,50 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const path = require('path');
+const crypto = require('crypto');
+
 const Listing = require('../models/Listing');
 const auth = require('../middleware/auth');
 const { requireRole } = require('../middleware/roles');
+
+
+// Image upload configuration
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, '../uploads'));
+  },
+
+  filename: (req, file, cb) => {
+    const uniqueName =
+      `${Date.now()}-${crypto.randomBytes(6).toString('hex')}` +
+      path.extname(file.originalname).toLowerCase();
+
+    cb(null, uniqueName);
+  }
+});
+
+const upload = multer({
+  storage,
+
+  limits: {
+    fileSize: 5 * 1024 * 1024 // Maximum 5MB
+  },
+
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = [
+      'image/jpeg',
+      'image/png',
+      'image/webp'
+    ];
+
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only JPG, PNG and WEBP images are allowed.'));
+    }
+  }
+});
 
 // PUBLIC: Get all active listings (Guests searching the homepage)
 router.get('/', async (req, res) => {
@@ -14,19 +56,36 @@ router.get('/', async (req, res) => {
   }
 });
 
-// PROTECTED (Host): Create a new listing
-router.post('/', [auth, requireRole(['host'])], async (req, res) => {
-  try {
-    const newListing = new Listing({
-      ...req.body,
-      hostId: req.user.id // Force the hostId to be the logged-in user's token ID for security
-    });
-    const savedListing = await newListing.save();
-    res.json(savedListing);
-  } catch (err) {
-    res.status(500).send('Server error');
+// PROTECTED (Host): Create a new listing with an image
+router.post(
+  '/',
+  [auth, requireRole(['host'])],
+  upload.single('image'),
+  async (req, res) => {
+    try {
+      const listingData = {
+        ...req.body,
+        hostId: req.user.id,
+        basePrice: Number(req.body.basePrice),
+        amenities: JSON.parse(req.body.amenities || '[]'),
+        image: req.file ? `/uploads/${req.file.filename}` : ''
+      };
+
+      const newListing = new Listing(listingData);
+
+      const savedListing = await newListing.save();
+
+      res.status(201).json(savedListing);
+
+    } catch (err) {
+      console.error('Listing upload error:', err);
+
+      res.status(500).json({
+        message: err.message || 'Could not create property.'
+      });
+    }
   }
-});
+);
 
 // PROTECTED (Host): Get listings owned by a specific host
 router.get('/host/:hostId', [auth, requireRole(['host'])], async (req, res) => {

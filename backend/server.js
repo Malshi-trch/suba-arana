@@ -1,4 +1,5 @@
-
+const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -10,6 +11,16 @@ const bookingRoutes = require('./routes/bookings');
 const adminRoutes = require('./routes/admin');
 
 const app = express();
+
+// Create uploads directory if it does not exist
+const uploadDirectory = path.join(__dirname, 'uploads');
+
+if (!fs.existsSync(uploadDirectory)) {
+  fs.mkdirSync(uploadDirectory, { recursive: true });
+}
+
+// Serve uploaded images
+app.use('/uploads', express.static(uploadDirectory));
 
 // Middleware
 app.use(cors({

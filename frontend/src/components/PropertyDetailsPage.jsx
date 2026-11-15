@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, MapPin, Star, Wifi, Coffee, Car, Wind, Mountain, ShieldCheck, CalendarDays, Users, Heart, CheckCircle2 } from 'lucide-react';
 import api from '../api/axios';
+import { getImageUrl } from '../utils/imageUrl';
 
 const amenityIcons = {
   'Free Wi-Fi': Wifi,
@@ -46,41 +47,75 @@ export default function PropertyDetailsPage({ onNavigateToLogin }) {
   const today = new Date().toISOString().slice(0, 10);
   const total = property && nights ? Number(property.basePrice || 0) * nights : 0;
 
-  const requestBooking = async (event) => {
-    event.preventDefault();
-    setMessage('');
-    const user = JSON.parse(localStorage.getItem('user') || 'null');
-    const token = localStorage.getItem('token');
-    if (!token || user?.role !== 'guest') {
-      setMessage('Please sign in with a guest account to request a booking.');
-      return;
-    }
-    if (!nights) {
-      setMessage('Choose a valid check-out date after your check-in date.');
-      return;
-    }
-    setSubmitting(true);
-    try {
-      await api.post('/bookings', {
-        listingId: property._id,
-        hostId: property.hostId?._id || property.hostId,
-        checkIn,
-        checkOut,
-        totalPrice: total,
-        notes: `${guests} guest(s). ${notes}`.trim(),
-      });
-      setMessage('Your booking request has been sent to the host. You can follow its status from your guest dashboard.');
-    } catch (error) {
-      setMessage(error.response?.data?.message || 'We could not send your request. Please check the listing and try again.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
+
+const requestBooking = async (event) => {
+  event.preventDefault();
+  setMessage('');
+
+  const user = JSON.parse(localStorage.getItem('user') || 'null');
+  const token = localStorage.getItem('token');
+
+  if (!token || user?.role !== 'guest') {
+    setMessage('Please sign in with a guest account to request a booking.');
+    return;
+  }
+
+  if (!property?._id) {
+    setMessage('Property information is unavailable.');
+    return;
+  }
+
+  if (!checkIn || !checkOut || !nights) {
+    setMessage('Choose valid check-in and check-out dates.');
+    return;
+  }
+
+  if (Number(guests) < 1 || Number(guests) > 5) {
+    setMessage('Guest count must be between 1 and 5.');
+    return;
+  }
+
+  setSubmitting(true);
+
+  try {
+    const response = await api.post('/bookings', {
+      listingId: property._id,
+      checkIn,
+      checkOut,
+      guestCount: Number(guests),
+      notes: notes.trim(),
+    });
+
+    setMessage(
+      response.data.message ||
+      'Your booking request has been sent successfully.'
+    );
+
+  } catch (error) {
+    console.error('Booking error:', error);
+
+    setMessage(
+      error.response?.data?.message ||
+      'We could not send your booking request. Please try again.'
+    );
+  } finally {
+    setSubmitting(false);
+  }
+};
+
 
   if (loading) return <main className="sa-page sa-centered"><div className="sa-loader" /><p>Finding this stay…</p></main>;
   if (!property) return <main className="sa-page sa-centered"><h1>Stay not found</h1><button className="sa-button sa-button-primary" onClick={() => navigate('/')}>Back to stays</button></main>;
 
-  const image = property.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1400&q=85';
+const fallback =
+  'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1400&q=85';
+
+const image = getImageUrl(property.image) || fallback;
+
+const handleImageError = (e) => {
+  e.currentTarget.onerror = null;
+  e.currentTarget.src = fallback;
+};
   return (
     <main className="sa-page">
       <header className="sa-detail-top">
@@ -97,13 +132,32 @@ export default function PropertyDetailsPage({ onNavigateToLogin }) {
         <div className="sa-rating"><Star size={17} fill="currentColor"/> <strong>4.8</strong><span>Guest-loved stay</span></div>
       </section>
 
-      <section className="sa-gallery">
-        <img className="sa-gallery-main" src={image} alt={property.name} />
-        <div className="sa-gallery-side">
-          <img src="https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=800&q=80" alt="Comfortable room" />
-          <img src="https://images.unsplash.com/photo-160021-j?auto=format&fit=crop&w=800&q=80" alt="Homestay interior" onError={(e) => { e.currentTarget.src = image; }} />
-        </div>
-      </section>
+      
+<section className="sa-gallery">
+  {/* Main Property Image */}
+  <img
+    className="sa-gallery-main"
+    src={image}
+    alt={property.name || 'Property'}
+    onError={handleImageError}
+  />
+
+  {/* Additional Property Images */}
+  <div className="sa-gallery-side">
+    <img
+      src={property.image || fallback}
+      alt="Property interior"
+      onError={handleImageError}
+    />
+
+    <img
+      src={property.image || fallback}
+      alt="Property room"
+      onError={handleImageError}
+    />
+  </div>
+</section>
+
 
       <div className="sa-detail-layout">
         <article className="sa-detail-content">

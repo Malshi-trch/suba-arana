@@ -17,3 +17,6 @@ build/
 
 # Editor files
 .vscode/
+
+backend/uploads/*
+!backend/uploads/.gitkeep
