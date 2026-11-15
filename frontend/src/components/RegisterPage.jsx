@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import api from '../api/axios';
+import './auth-pages.css';
 
 import {
   Home,
@@ -142,10 +143,10 @@ export default function RegisterPage({
   };
 
   return (
-    <div className="min-h-screen flex bg-slate-50">
+    <div className="sa-auth-page sa-auth-register min-h-screen flex bg-slate-50">
 
       {/* Left Side Branding */}
-      <div className="hidden lg:flex lg:w-5/12 relative bg-emerald-900 text-white flex-col justify-between p-12 overflow-hidden">
+      <div className="sa-auth-visual sa-auth-register-visual hidden lg:flex lg:w-5/12 relative bg-emerald-900 text-white flex-col justify-between p-12 overflow-hidden">
 
         <div
           className="absolute inset-0 bg-cover bg-center opacity-35"
@@ -157,11 +158,8 @@ export default function RegisterPage({
 
         <div className="absolute inset-0 bg-gradient-to-t from-emerald-950 via-emerald-900/75 to-emerald-900/40" />
 
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="bg-amber-400 text-emerald-950 p-2.5 rounded-xl shadow-lg">
-            <Home className="w-7 h-7 stroke-[2.2]" />
-          </div>
-
+        <div className="sa-auth-brand relative z-10 flex items-center gap-3">
+          <img src="/suba-arana-emblem.png" alt="Suba-Arana emblem" className="sa-auth-logo" />
           <div>
             <h1 className="text-2xl font-bold tracking-tight">
               Suba-Arana
@@ -201,16 +199,13 @@ export default function RegisterPage({
       </div>
 
       {/* Right Side Registration Form */}
-      <div className="w-full lg:w-7/12 flex items-center justify-center p-6 sm:p-10 overflow-y-auto">
+      <div className="sa-auth-form-side sa-auth-register-form w-full lg:w-7/12 flex items-center justify-center p-6 sm:p-10 overflow-y-auto">
 
-        <div className="w-full max-w-xl bg-white rounded-2xl shadow-xl border border-slate-100 p-6 sm:p-8">
+        <div className="sa-auth-card sa-auth-register-card w-full max-w-xl bg-white rounded-2xl shadow-xl border border-slate-100 p-6 sm:p-8">
 
           {/* Mobile Branding */}
-          <div className="flex lg:hidden items-center gap-2.5 mb-5">
-            <div className="bg-emerald-700 text-amber-300 p-2 rounded-lg">
-              <Home className="w-6 h-6" />
-            </div>
-
+          <div className="sa-auth-mobile-brand flex lg:hidden items-center gap-2.5 mb-5">
+            <img src="/suba-arana-emblem.png" alt="Suba-Arana emblem" className="sa-auth-logo sa-auth-logo-small" />
             <div>
               <h1 className="text-xl font-bold text-slate-900">
                 Suba-Arana
